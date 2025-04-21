@@ -1,0 +1,12 @@
+lang: en
+
+# Delay after which a player is marked as AFK (seconds)
+afk-delay: 600
+
+# Delay after which a player marked as AFK is connected to the AFK server (seconds)
+action-delay: 30
+
+# Action to be performed after action delay is reached. Possible values: "kick", "nothing".
+# "kick" - player is kicked from the server
+# "nothing" - nothing happens
+action: "kick"

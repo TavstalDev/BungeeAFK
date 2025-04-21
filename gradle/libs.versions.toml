@@ -1,0 +1,29 @@
+[versions]
+bungee = "1.21-R0.1-SNAPSHOT"
+spigot = "1.21.4-R0.1-SNAPSHOT"
+velocity = "3.0.0"
+snakeyaml = "1.29"
+gson = "2.11.0"
+guice = "7.0.0"
+annotations = "26.0.1"
+bstats = "3.0.2"
+adventureTextMinimessage = "4.17.0"
+adventureTextSerializerLegacy = "4.17.0"
+adventureBungee = "4.3.4"
+adventueBukkit = "4.3.4"
+
+[libraries]
+bungee = { module = "net.md-5:bungeecord-api", version.ref = "bungee" }
+spigot = { module = "org.spigotmc:spigot-api", version.ref = "spigot" }
+velocity = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
+snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+guice = { module = "com.google.inject:guice", version.ref = "guice" }
+annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
+bstats = { module = "org.bstats:bstats-bukkit", version.ref = "bstats" }
+bstatsVelocity = { module = "org.bstats:bstats-velocity", version.ref = "bstats" }
+bstatsBungee = { module = "org.bstats:bstats-bungeecord", version.ref = "bstats" }
+adventureTextMinimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventureTextMinimessage" }
+adventureTextSerializerLegacy = { module = "net.kyori:adventure-text-serializer-legacy", version.ref = "adventureTextSerializerLegacy" }
+adventureBungee = { module = "net.kyori:adventure-platform-bungeecord", version.ref = "adventureBungee" }
+adventureBukkit = { module = "net.kyori:adventure-platform-bukkit", version.ref = "adventueBukkit" }

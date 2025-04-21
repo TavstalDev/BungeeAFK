@@ -1,0 +1,57 @@
+package net.fameless.core.handling;
+
+import net.fameless.core.BungeeAFK;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public enum Action {
+
+    KICK,
+    CONNECT,
+    NOTHING;
+
+    private static final List<Action> excludedActions = new ArrayList<>();
+
+    private final String IDENTIFIER = name().toLowerCase();
+    private final String MESSAGE_KEY = "notification.action." + IDENTIFIER;
+
+    public String getIdentifier() {
+        return IDENTIFIER;
+    }
+
+    public String getMessageKey() {
+        return MESSAGE_KEY;
+    }
+
+    public boolean isAvailable() {
+        return !excludedActions.contains(this);
+    }
+
+    public static boolean isAfkServerConfigured() {
+        if (!BungeeAFK.getConfig().contains("afk-server-name")) {
+            return false;
+        }
+
+        String serverName = BungeeAFK.getConfig().getString("afk-server-name");
+        return BungeeAFK.platform().doesServerExist(serverName);
+    }
+
+    public static @NotNull Action fromIdentifier(String identifier) throws IllegalArgumentException {
+        for (Action action : values()) {
+            if (action.getIdentifier().equalsIgnoreCase(identifier)) {
+                return action;
+            }
+        }
+        throw new IllegalArgumentException("No action found for identifier: " + identifier);
+    }
+
+    public static void setActionExcluded(Action action, boolean excluded) {
+        if (excluded) {
+            excludedActions.add(action);
+        } else {
+            excludedActions.remove(action);
+        }
+    }
+}

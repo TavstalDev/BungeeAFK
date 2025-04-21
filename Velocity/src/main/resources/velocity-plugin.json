@@ -1,0 +1,8 @@
+{
+  "id": "bungeeafk",
+  "name": "BungeeAFK-Velocity",
+  "version": "1.0.0",
+  "main": "net.fameless.velocity.VelocityPlatform",
+  "authors": ["Fameless9"],
+  "description": "BungeeAFK for Velocity proxy"
+}
