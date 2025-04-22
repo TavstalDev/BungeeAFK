@@ -86,7 +86,7 @@ You can configure the plugin using the `/bungeeafk` or `/bafk` command.
 
 ## 📥 Downloads
 
-Download from the [Releases](./releases) tab.
+Download from the [Latest Release](https://github.com/Fameless9/BungeeAFK/releases/latest).
 
 ---
 
