@@ -32,6 +32,11 @@ public final class SpigotPlatform extends JavaPlugin implements BungeeAFKPlatfor
     }
 
     @Override
+    public void onDisable() {
+        BungeeAFK.handleShutdown();
+    }
+
+    @Override
     public void shutDown(String message) {
         Bukkit.getPluginManager().disablePlugin(this);
     }

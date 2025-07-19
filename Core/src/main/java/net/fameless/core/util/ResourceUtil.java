@@ -6,8 +6,7 @@ import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.InputStreamReader;
+import java.io.*;
 
 public class ResourceUtil {
 
@@ -43,4 +42,26 @@ public class ResourceUtil {
         }
     }
 
+    public static void extractResourceIfMissing(String resourcePath, @NotNull File targetFile) {
+        if (targetFile.exists()) return;
+
+        targetFile.getParentFile().mkdirs();
+
+        try (InputStream in = ResourceUtil.class.getClassLoader().getResourceAsStream(resourcePath);
+             OutputStream out = new FileOutputStream(targetFile)) {
+
+            if (in == null) {
+                throw new FileNotFoundException("Resource not found in JAR: " + resourcePath);
+            }
+
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = in.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to extract resource: " + resourcePath, e);
+        }
+    }
 }

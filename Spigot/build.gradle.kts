@@ -30,7 +30,7 @@ tasks {
     }
 
     shadowJar {
-        archiveBaseName.set("BungeeAFK-Velocity")
+        archiveBaseName.set("BungeeAFK-Spigot")
         archiveClassifier.set("")
         archiveVersion.set("1.0.0")
 

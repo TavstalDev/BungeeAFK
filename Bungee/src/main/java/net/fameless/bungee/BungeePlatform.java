@@ -44,13 +44,18 @@ public final class BungeePlatform extends Plugin implements BungeeAFKPlatform {
             throw new RuntimeException(e);
         }
 
-        getProxy().getPluginManager().registerCommand(this, new BungeeCommandHandler("bungeeafk"));
+        getProxy().getPluginManager().registerCommand(this, new BungeeCommandHandler("bungeeafk", new String[]{"bafk"}));
 
         BungeeAFK.initCore(new BungeeModule());
 
         proxyServer.registerChannel("bungee:bungeeafk");
 
         new Metrics(this, 25576);
+    }
+
+    @Override
+    public void onDisable() {
+        BungeeAFK.handleShutdown();
     }
 
     public void makeFile() throws IOException {

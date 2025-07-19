@@ -20,6 +20,9 @@
   "command.action_delay_set": "<prefix><green>Aktion-Verzögerung auf <delay> gesetzt.",
   "command.action_set": "<prefix><green>Aktion auf <action> gesetzt.",
   "command.action_not_configured": "<prefix><red>Die Aktion wurde nicht konfiguriert. Gib einen Servernamen in der config.yml an.",
+  "command.no_such_key": "<prefix><red>Es gibt keinen Eintrag mit dem Schlüssel <key>.",
+  "command.language_not_loaded": "<prefix><red>Die Sprache <language> wurde nicht geladen.",
+  "command.caption_set": "<prefix><green>Caption in '<language>' mit Schlüssel '<key>' auf '<caption>' gesetzt.",
   "error.no_caller_type": "<prefix><red>Falscher CallerType.",
   "actionbar.afk": "<blue>Du bist AFK"
 }

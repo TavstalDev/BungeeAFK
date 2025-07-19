@@ -20,6 +20,9 @@
   "command.action_delay_set": "<prefix><green>Action delay set to <delay>.",
   "command.action_set": "<prefix><green>Action set to <action>.",
   "command.action_not_configured": "<prefix><red>Action not configured. Please specify a server name in the config.yml.",
+  "command.no_such_key": "<prefix><red>No entry found with the key <key>.",
+  "command.language_not_loaded": "<prefix><red>The language <language> has not been loaded.",
+  "command.caption_set": "<prefix><green>Caption in '<language>' with key '<key>' set to '<caption>'.",
   "error.no_caller_type": "<prefix><red>Invalid CallerType.",
   "actionbar.afk": "<blue>You are AFK"
 }

@@ -1,5 +1,6 @@
 package net.fameless.core.command;
 
+import com.google.gson.JsonObject;
 import net.fameless.core.BungeeAFK;
 import net.fameless.core.caption.Caption;
 import net.fameless.core.caption.Language;
@@ -93,6 +94,35 @@ public class MainCommand extends Command {
                             TagResolver.resolver("action", Tag.inserting(Component.text(action.getIdentifier().toLowerCase())))
                     ));
                 }
+                case "caption" -> {
+                    // /bafk configure caption <lang> <key> <new-caption>
+                    Language language = Language.ofIdentifier(args[2]);
+                    if (language == null) {
+                        caller.sendMessage(Caption.of("command.invalid_language"));
+                        return;
+                    }
+
+                    JsonObject languageJsonObject = Caption.getLanguageJsonObject(language);
+                    if (languageJsonObject == null) {
+                        caller.sendMessage(Caption.of("command.language_not_loaded", TagResolver.resolver("language", Tag.inserting(Component.text(language.getIdentifier())))));
+                        return;
+                    }
+
+                    String captionKey = args[3];
+                    if (!Caption.hasKey(language, captionKey)) {
+                        caller.sendMessage(Caption.of("command.no_such_key", TagResolver.resolver("key", Tag.inserting(Component.text(captionKey)))));
+                        return;
+                    }
+
+                    languageJsonObject.addProperty(captionKey, String.join(" ", Arrays.copyOfRange(args, 4, args.length)));
+                    Caption.loadLanguage(language, languageJsonObject);
+
+                    caller.sendMessage(Caption.of("command.caption_set",
+                            TagResolver.resolver("language", Tag.inserting(Component.text(language.getIdentifier()))),
+                            TagResolver.resolver("key", Tag.inserting(Component.text(captionKey))),
+                            TagResolver.resolver("caption", Tag.inserting(Component.text(Caption.getString(language, captionKey))))
+                    ));
+                }
             }
         } else if (args[0].equalsIgnoreCase("lang")) {
             Language newLanguage;
@@ -115,17 +145,41 @@ public class MainCommand extends Command {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
             completions.addAll(Arrays.asList("configure", "lang"));
-        } else if (args.length == 2 && args[0].equalsIgnoreCase("configure")) {
-            completions.addAll(Arrays.asList("afk-delay", "action-delay", "action"));
-        } else if (args.length == 3 && args[0].equalsIgnoreCase("configure")) {
-            if (args[1].equalsIgnoreCase("action")) {
-                for (Action action : Action.values()) {
-                    completions.add(action.getIdentifier());
+        } else if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("configure")) {
+                completions.addAll(Arrays.asList("afk-delay", "action-delay", "action", "caption"));
+            } else if (args[0].equalsIgnoreCase("lang")) {
+                for (Language language : Language.values()) {
+                    completions.add(language.getIdentifier());
                 }
             }
-        } else if (args.length == 2 && args[0].equalsIgnoreCase("lang")) {
-            for (Language language : Language.values()) {
-                completions.add(language.getIdentifier());
+        } else if (args.length == 3) {
+            if (args[0].equalsIgnoreCase("configure")) {
+                if (args[1].equalsIgnoreCase("action")) {
+                    for (Action action : Action.values()) {
+                        completions.add(action.getIdentifier());
+                    }
+                } else if (args[1].equalsIgnoreCase("afk-delay") || args[1].equalsIgnoreCase("action-delay")) {
+                    completions.add("<seconds>");
+                } else if (args[1].equalsIgnoreCase("caption")) {
+                    for (Language language : Language.values()) {
+                        completions.add(language.getIdentifier());
+                    }
+                }
+            }
+        } else if (args.length == 4) {
+            if (args[0].equalsIgnoreCase("configure") && args[1].equalsIgnoreCase("caption")) {
+                Language language = Language.ofIdentifier(args[2]);
+                if (language != null) {
+                    JsonObject languageObj = Caption.getLanguageJsonObject(language);
+                    if (languageObj != null) {
+                        completions.addAll(languageObj.keySet());
+                    }
+                }
+            }
+        } else if (args.length == 5) {
+            if (args[0].equalsIgnoreCase("configure") && args[1].equalsIgnoreCase("caption")) {
+                completions.add("<new-caption>");
             }
         }
         return StringUtil.copyPartialMatches(args[args.length - 1], completions, new ArrayList<>());

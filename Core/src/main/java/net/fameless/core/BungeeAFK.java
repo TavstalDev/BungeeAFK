@@ -9,7 +9,6 @@ import net.fameless.core.caption.Language;
 import net.fameless.core.command.framework.Command;
 import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.inject.PlatformConfig;
-import net.fameless.core.util.ResourceUtil;
 
 import java.util.logging.Logger;
 
@@ -37,15 +36,15 @@ public class BungeeAFK {
         logger = platform.getLogger();
         Command.init();
 
+        Caption.loadDefaultLanguages();
         Caption.setCurrentLanguage(Language.ofIdentifier(config.getString("lang", "en")));
-        initLanguages();
 
         initialized = true;
     }
 
-    private static void initLanguages() {
-        Caption.loadLanguage(Language.ENGLISH, ResourceUtil.readJsonResource("lang_en.json"));
-        Caption.loadLanguage(Language.GERMAN, ResourceUtil.readJsonResource("lang_de.json"));
+    public static void handleShutdown() {
+        if (!initialized) return;
+        Caption.handleShutdown();
     }
 
     public static Logger getLogger() {

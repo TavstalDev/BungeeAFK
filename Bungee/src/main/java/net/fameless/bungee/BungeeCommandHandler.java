@@ -6,8 +6,8 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 
 public class BungeeCommandHandler extends net.md_5.bungee.api.plugin.Command implements TabExecutor {
 
-    public BungeeCommandHandler(String name) {
-        super(name);
+    public BungeeCommandHandler(String name, String[] aliases) {
+        super(name, "", aliases);
     }
 
     @Override
