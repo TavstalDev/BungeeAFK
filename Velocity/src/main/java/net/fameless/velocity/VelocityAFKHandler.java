@@ -16,6 +16,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 public class VelocityAFKHandler implements AFKHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + VelocityAFKHandler.class.getSimpleName());
     private final long warningTime = 60 * 1000L;
     private final List<BAFKPlayer<?>> WARNED = new ArrayList<>();
     private final Map<BAFKPlayer<?>, Long> playerAfkTimeMap = new HashMap<>();
@@ -43,19 +46,19 @@ public class VelocityAFKHandler implements AFKHandler {
         try {
             this.action = Action.fromIdentifier(BungeeAFK.getConfig().getString("action", "kick"));
         } catch (IllegalArgumentException e) {
-            BungeeAFK.getLogger().warning("Invalid action identifier in config. Defaulting to KICK.");
+            LOGGER.warn("Invalid action identifier in config. Defaulting to KICK.");
             this.action = Action.KICK;
         }
 
         if (action.equals(Action.CONNECT)) {
             if (!BungeeAFK.getConfig().contains("afk-server-name")) {
-                BungeeAFK.getLogger().warning("AFK server not found. Defaulting to KICK.");
+                LOGGER.warn("AFK server not found. Defaulting to KICK.");
                 this.action = Action.KICK;
             }
 
             String serverName = BungeeAFK.getConfig().getString("afk-server-name");
             if (!checkServerAvailable(serverName)) {
-                BungeeAFK.getLogger().warning("AFK server not found. Defaulting to KICK.");
+                LOGGER.warn("AFK server not found. Defaulting to KICK.");
                 this.action = Action.KICK;
             }
         }
@@ -141,12 +144,12 @@ public class VelocityAFKHandler implements AFKHandler {
             switch (this.action) {
                 case CONNECT -> {
                     if (!Action.isAfkServerConfigured()) {
-                        BungeeAFK.getLogger().warning("AFK server not found. Defaulting to KICK.");
+                        LOGGER.warn("AFK server not found. Defaulting to KICK.");
 
                         this.action = Action.KICK;
                         if (timeSinceAfk > actionDelay) {
                             platformPlayer.disconnect(Caption.of("notification.afk_kick"));
-                            BungeeAFK.getLogger().info("Kicked " + velocityPlayer.getName() + " for being AFK.");
+                            LOGGER.info("Kicked " + velocityPlayer.getName() + " for being AFK.");
                         }
                         return;
                     }
@@ -155,13 +158,13 @@ public class VelocityAFKHandler implements AFKHandler {
                         playerLastServerMap.put(velocityPlayer, playerServer.getServerInfo().getName());
                         velocityPlayer.connect(BungeeAFK.getConfig().getString("afk-server-name"));
                         velocityPlayer.sendMessage(Caption.of("notification.afk_disconnect"));
-                        BungeeAFK.getLogger().info("Moved " + velocityPlayer.getName() + " to AFK server.");
+                        LOGGER.info("Moved " + velocityPlayer.getName() + " to AFK server.");
                     }
                 }
                 case KICK -> {
                     if (timeSinceAfk > actionDelay) {
                         platformPlayer.disconnect(Caption.of("notification.afk_kick"));
-                        BungeeAFK.getLogger().info("Kicked " + velocityPlayer.getName() + " for being AFK.");
+                        LOGGER.info("Kicked " + velocityPlayer.getName() + " for being AFK.");
                     }
                 }
             }

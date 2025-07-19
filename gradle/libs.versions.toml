@@ -11,6 +11,8 @@ adventureTextMinimessage = "4.17.0"
 adventureTextSerializerLegacy = "4.17.0"
 adventureBungee = "4.3.4"
 adventueBukkit = "4.3.4"
+slf4j = "2.0.16"
+logback = "1.5.18"
 
 [libraries]
 bungee = { module = "net.md-5:bungeecord-api", version.ref = "bungee" }
@@ -27,3 +29,5 @@ adventureTextMinimessage = { module = "net.kyori:adventure-text-minimessage", ve
 adventureTextSerializerLegacy = { module = "net.kyori:adventure-text-serializer-legacy", version.ref = "adventureTextSerializerLegacy" }
 adventureBungee = { module = "net.kyori:adventure-platform-bungeecord", version.ref = "adventureBungee" }
 adventureBukkit = { module = "net.kyori:adventure-platform-bukkit", version.ref = "adventueBukkit" }
+slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }

@@ -10,12 +10,15 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.HashMap;
 
 public final class Caption {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + Caption.class.getSimpleName());
     private static final HashMap<Language, JsonObject> languageJsonObjectHashMap = new HashMap<>();
     private static Language currentLanguage = Language.ENGLISH;
     private static final Gson GSON = new GsonBuilder()
@@ -41,6 +44,7 @@ public final class Caption {
 
     public static void loadLanguage(Language language, JsonObject jsonObject) {
         languageJsonObjectHashMap.put(language, jsonObject);
+        LOGGER.info("Successfully loaded language: {}", language.getIdentifier());
     }
 
     public static void loadDefaultLanguages() {

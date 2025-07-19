@@ -16,6 +16,8 @@ import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BungeeAFKHandler implements net.fameless.core.handling.AFKHandler, Listener {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + BungeeAFKHandler.class.getSimpleName());
     private final long warningTime = 60 * 1000L;
     private final List<BAFKPlayer<?>> WARNED = new ArrayList<>();
     private final Map<BAFKPlayer<?>, Long> playerAfkTimeMap = new HashMap<>();
@@ -43,19 +46,19 @@ public class BungeeAFKHandler implements net.fameless.core.handling.AFKHandler, 
         try {
             this.action = Action.fromIdentifier(BungeeAFK.getConfig().getString("action", "kick"));
         } catch (IllegalArgumentException e) {
-            BungeeAFK.getLogger().warning("Invalid action identifier in config. Defaulting to KICK.");
+            LOGGER.warn("Invalid action identifier in config. Defaulting to KICK.");
             this.action = Action.KICK;
         }
 
         if (action.equals(Action.CONNECT)) {
             if (!BungeeAFK.getConfig().contains("afk-server-name")) {
-                BungeeAFK.getLogger().warning("AFK server not found. Defaulting to KICK.");
+                LOGGER.warn("AFK server not found. Defaulting to KICK.");
                 this.action = Action.KICK;
             }
 
             String serverName = BungeeAFK.getConfig().getString("afk-server-name");
             if (!checkServerAvailable(serverName)) {
-                BungeeAFK.getLogger().warning("AFK server not found. Defaulting to KICK.");
+                LOGGER.warn("AFK server not found. Defaulting to KICK.");
                 this.action = Action.KICK;
             }
         }
@@ -140,12 +143,12 @@ public class BungeeAFKHandler implements net.fameless.core.handling.AFKHandler, 
             switch (this.action) {
                 case CONNECT -> {
                     if (!Action.isAfkServerConfigured()) {
-                        BungeeAFK.getLogger().warning("AFK server not found. Defaulting to KICK.");
+                        LOGGER.warn("AFK server not found. Defaulting to KICK.");
 
                         this.action = Action.KICK;
                         if (timeSinceAfk > actionDelay) {
                             platformPlayer.disconnect(BungeeComponentSerializer.get().serialize(Caption.of("notification.afk_kick")));
-                            BungeeAFK.getLogger().info("Kicked " + bungeePlayer.getName() + " for being AFK.");
+                            LOGGER.info("Kicked " + bungeePlayer.getName() + " for being AFK.");
                         }
                         return;
                     }
@@ -154,13 +157,13 @@ public class BungeeAFKHandler implements net.fameless.core.handling.AFKHandler, 
                         playerLastServerMap.put(bungeePlayer, playerServer.getInfo().getName());
                         bungeePlayer.connect(BungeeAFK.getConfig().getString("afk-server-name"));
                         bungeePlayer.sendMessage(Caption.of("notification.afk_disconnect"));
-                        BungeeAFK.getLogger().info("Moved " + bungeePlayer.getName() + " to AFK server.");
+                        LOGGER.info("Moved " + bungeePlayer.getName() + " to AFK server.");
                     }
                 }
                 case KICK -> {
                     if (timeSinceAfk > actionDelay) {
                         platformPlayer.disconnect(BungeeComponentSerializer.get().serialize(Caption.of("notification.afk_kick")));
-                        BungeeAFK.getLogger().info("Kicked " + bungeePlayer.getName() + " for being AFK.");
+                        LOGGER.info("Kicked " + bungeePlayer.getName() + " for being AFK.");
                     }
                 }
             }

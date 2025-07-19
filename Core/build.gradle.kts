@@ -17,4 +17,6 @@ dependencies {
     implementation(libs.guice)
     implementation(libs.adventureTextMinimessage)
     implementation(libs.adventureTextSerializerLegacy)
+    api(libs.slf4j)
+    api(libs.logback)
 }

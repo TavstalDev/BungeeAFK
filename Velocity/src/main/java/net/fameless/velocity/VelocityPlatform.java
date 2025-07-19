@@ -13,7 +13,6 @@ import net.kyori.adventure.text.Component;
 import org.bstats.velocity.Metrics;
 
 import java.nio.file.Path;
-import java.util.logging.Logger;
 
 @Plugin(
     id = "bungeeafk",
@@ -27,15 +26,13 @@ public class VelocityPlatform implements BungeeAFKPlatform {
 
     private static VelocityPlatform instance;
 
-    private final Logger logger;
     private final ProxyServer proxyServer;
     private final Path dataDirectory;
     private final Metrics.Factory metricsFactory;
 
     @Inject
-    public VelocityPlatform(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
+    public VelocityPlatform(ProxyServer proxyServer, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
         this.proxyServer = proxyServer;
-        this.logger = logger;
         this.dataDirectory = dataDirectory;
         this.metricsFactory = metricsFactory;
     }
@@ -66,11 +63,6 @@ public class VelocityPlatform implements BungeeAFKPlatform {
 
     public static VelocityPlatform get() {
         return instance;
-    }
-
-    @Override
-    public java.util.logging.Logger getLogger() {
-        return logger;
     }
 
     @Override

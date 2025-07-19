@@ -16,6 +16,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SpigotAFKHandler implements AFKHandler, Listener {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + SpigotAFKHandler.class.getSimpleName());
     private final long warningTime = 60 * 1000L;
     private final List<BAFKPlayer<?>> WARNED = new ArrayList<>();
     private final Map<BAFKPlayer<?>, Long> playerAfkTimeMap = new HashMap<>();
@@ -42,7 +45,7 @@ public class SpigotAFKHandler implements AFKHandler, Listener {
         try {
             this.action = Action.fromIdentifier(BungeeAFK.getConfig().getString("action", "kick"));
         } catch (IllegalArgumentException e) {
-            BungeeAFK.getLogger().warning("Invalid action identifier in config. Defaulting to KICK.");
+            LOGGER.warn("Invalid action identifier in config. Defaulting to KICK.");
             this.action = Action.KICK;
         }
 
@@ -116,7 +119,7 @@ public class SpigotAFKHandler implements AFKHandler, Listener {
         long timeSinceAfk = System.currentTimeMillis() - playerAfkTimeMap.get(spigotPlayer);
         if (timeSinceAfk > actionDelay) {
             spigotPlayer.kick(Caption.of("notification.afk_kick"));
-            BungeeAFK.getLogger().info("Kicked " + spigotPlayer.getName() + " for being AFK.");
+            LOGGER.info("Kicked {} for being AFK.", spigotPlayer.getName());
         }
     }
 
@@ -141,5 +144,4 @@ public class SpigotAFKHandler implements AFKHandler, Listener {
     public void onInteract(@NotNull PlayerInteractEvent event) {
         SpigotPlayer.adapt(event.getPlayer()).updateWhenToAfk();
     }
-
 }

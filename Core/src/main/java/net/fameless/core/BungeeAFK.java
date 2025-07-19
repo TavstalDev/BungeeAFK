@@ -9,14 +9,14 @@ import net.fameless.core.caption.Language;
 import net.fameless.core.command.framework.Command;
 import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.inject.PlatformConfig;
-
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BungeeAFK {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + BungeeAFK.class.getSimpleName());
     private static boolean initialized = false;
     private static BungeeAFKPlatform platform;
-    private static Logger logger;
     private static Injector injector;
     private static PlatformConfig config;
 
@@ -33,22 +33,18 @@ public class BungeeAFK {
         platform = injector.getInstance(BungeeAFKPlatform.class);
         config = injector.getInstance(PlatformConfig.class);
         injector.getInstance(AFKHandler.class).init();
-        logger = platform.getLogger();
         Command.init();
 
         Caption.loadDefaultLanguages();
         Caption.setCurrentLanguage(Language.ofIdentifier(config.getString("lang", "en")));
 
         initialized = true;
+        LOGGER.info("BungeeAFK Core initialized successfully.");
     }
 
     public static void handleShutdown() {
         if (!initialized) return;
         Caption.saveToFile();
-    }
-
-    public static Logger getLogger() {
-        return logger;
     }
 
     public static Injector injector() {

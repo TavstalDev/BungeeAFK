@@ -1,6 +1,5 @@
 package net.fameless.core.command.framework;
 
-import net.fameless.core.BungeeAFK;
 import net.fameless.core.caption.Caption;
 import net.fameless.core.command.MainCommand;
 import net.kyori.adventure.text.Component;
@@ -8,6 +7,8 @@ import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 public abstract class Command {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + Command.class.getSimpleName());
     private static final List<Command> COMMANDS = new ArrayList<>();
     public final String id;
     public final List<String> aliases;
@@ -48,14 +50,14 @@ public abstract class Command {
         @NotNull Optional<Command> commandOptional = getCommandById(commandId);
         commandOptional.ifPresentOrElse(
                 command -> command.execute(caller, args),
-                () -> BungeeAFK.platform().getLogger().severe("Error while trying to execute command: " + commandId + ". Command not registered.")
+                () -> LOGGER.error("Error while trying to execute command: {}. Command not registered.", commandId)
         );
     }
 
     public static @NotNull @Unmodifiable List<String> tabComplete(String commandId, CommandCaller caller, String[] args) {
         @NotNull Optional<Command> commandOptional = getCommandById(commandId);
         if (commandOptional.isPresent()) return commandOptional.get().getTabCompletions(caller, args);
-        BungeeAFK.platform().getLogger().severe("Error while trying to get tab-completions for command: " + commandId + ". Command not registered.");
+        LOGGER.error("Error while trying to get tab-completions for command: {}. Command not registered.", commandId);
         return List.of();
     }
 
