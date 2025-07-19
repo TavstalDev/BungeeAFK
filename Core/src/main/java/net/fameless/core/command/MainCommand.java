@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,13 +33,17 @@ public class MainCommand extends Command {
     }
 
     @Override
-    protected void executeCommand(CommandCaller caller, String[] args) {
+    protected void executeCommand(CommandCaller caller, String @NotNull [] args) {
         if (args.length < 2) return;
         if (args[0].equalsIgnoreCase("configure")) {
             AFKHandler afkHandler = BungeeAFK.injector().getInstance(AFKHandler.class);
             switch (args[1]) {
                 case "afk-delay" -> {
-                    if (args.length < 3) return;
+                    if (args.length < 3) {
+                        sendUsage(caller);
+                        return;
+                    }
+
                     long delay;
                     try {
                         int delaySeconds = Integer.parseInt(args[2]);
@@ -54,7 +59,11 @@ public class MainCommand extends Command {
                     ));
                 }
                 case "action-delay" -> {
-                    if (args.length < 3) return;
+                    if (args.length < 3) {
+                        sendUsage(caller);
+                        return;
+                    }
+
                     long delay;
                     try {
                         int delaySeconds = Integer.parseInt(args[2]);
@@ -95,7 +104,6 @@ public class MainCommand extends Command {
                     ));
                 }
                 case "caption" -> {
-                    // /bafk configure caption <lang> <key> <new-caption>
                     Language language = Language.ofIdentifier(args[2]);
                     if (language == null) {
                         caller.sendMessage(Caption.of("command.invalid_language"));
@@ -125,6 +133,11 @@ public class MainCommand extends Command {
                 }
             }
         } else if (args[0].equalsIgnoreCase("lang")) {
+            if (args[1].equalsIgnoreCase("reload")) {
+                Caption.loadDefaultLanguages();
+                caller.sendMessage(Caption.of("command.languages_reloaded"));
+                return;
+            }
             Language newLanguage;
             try {
                 newLanguage = Language.ofIdentifier(args[1]);
@@ -141,7 +154,7 @@ public class MainCommand extends Command {
     }
 
     @Override
-    protected List<String> tabComplete(CommandCaller caller, String[] args) {
+    protected List<String> tabComplete(CommandCaller caller, String @NotNull [] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
             completions.addAll(Arrays.asList("configure", "lang"));

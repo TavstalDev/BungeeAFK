@@ -23,6 +23,7 @@
   "command.no_such_key": "<prefix><red>No entry found with the key <key>.",
   "command.language_not_loaded": "<prefix><red>The language <language> has not been loaded.",
   "command.caption_set": "<prefix><green>Caption in '<language>' with key '<key>' set to '<caption>'.",
+  "command.languages_reloaded": "<prefix><green>Languages reloaded successfully.",
   "error.no_caller_type": "<prefix><red>Invalid CallerType.",
   "actionbar.afk": "<blue>You are AFK"
 }

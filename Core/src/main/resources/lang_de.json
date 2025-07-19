@@ -23,6 +23,7 @@
   "command.no_such_key": "<prefix><red>Es gibt keinen Eintrag mit dem Schlüssel <key>.",
   "command.language_not_loaded": "<prefix><red>Die Sprache <language> wurde nicht geladen.",
   "command.caption_set": "<prefix><green>Caption in '<language>' mit Schlüssel '<key>' auf '<caption>' gesetzt.",
+  "command.languages_reloaded": "<prefix><green>Sprachen erfolgreich neu geladen.",
   "error.no_caller_type": "<prefix><red>Falscher CallerType.",
   "actionbar.afk": "<blue>Du bist AFK"
 }
