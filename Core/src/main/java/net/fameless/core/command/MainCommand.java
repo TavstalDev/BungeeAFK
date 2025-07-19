@@ -163,6 +163,7 @@ public class MainCommand extends Command {
             if (args[0].equalsIgnoreCase("configure")) {
                 completions.addAll(Arrays.asList("afk-delay", "action-delay", "action", "caption"));
             } else if (args[0].equalsIgnoreCase("lang")) {
+                completions.add("reload");
                 for (Language language : Language.values()) {
                     completions.add(language.getIdentifier());
                 }
