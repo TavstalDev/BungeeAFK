@@ -1,7 +1,9 @@
 package net.fameless.bungee;
 
-import net.fameless.core.BungeeAFK;
 import net.fameless.core.caption.Caption;
+import net.fameless.core.config.PluginConfig;
+import net.fameless.core.handling.AFKHandler;
+import net.fameless.core.handling.AFKState;
 import net.fameless.core.handling.Action;
 import net.fameless.core.player.BAFKPlayer;
 import net.fameless.core.util.Format;
@@ -22,13 +24,12 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class BungeeAFKHandler implements net.fameless.core.handling.AFKHandler, Listener {
+public class BungeeAFKHandler implements AFKHandler, Listener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + BungeeAFKHandler.class.getSimpleName());
-    private final List<BAFKPlayer<?>> WARNED = new ArrayList<>();
-    private final Map<BAFKPlayer<?>, Long> playerAfkTimeMap = new HashMap<>();
     private final Map<BAFKPlayer<?>, String> playerLastServerMap = new HashMap<>();
 
     private Action action;
@@ -37,41 +38,27 @@ public class BungeeAFKHandler implements net.fameless.core.handling.AFKHandler, 
     private long afkDelay;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> scheduledTask;
 
     @Override
     public void init() {
-        this.warnDelay = BungeeAFK.getConfig().getInt("warning-delay", 60) * 1000L;
-        this.actionDelay = BungeeAFK.getConfig().getInt("action-delay", 30) * 1000L;
-        this.afkDelay = BungeeAFK.getConfig().getInt("afk-delay", 600) * 1000L;
+        updateConfigValues();
 
-        try {
-            this.action = Action.fromIdentifier(BungeeAFK.getConfig().getString("action", "kick"));
-        } catch (IllegalArgumentException e) {
-            LOGGER.warn("Invalid action identifier in config. Defaulting to KICK.");
-            this.action = Action.KICK;
-        }
+        // try-catch block to handle exceptions that would otherwise silently cancel the task
+        scheduledTask = scheduler.scheduleAtFixedRate(() -> {
+            try {
+                for (BAFKPlayer<?> player : BungeePlayer.getOnlinePlayers()) {
+                    if (!(player instanceof BungeePlayer bungeePlayer)) continue;
 
-        if (action.equals(Action.CONNECT)) {
-            if (!BungeeAFK.getConfig().contains("afk-server-name")) {
-                LOGGER.warn("AFK server not found. Defaulting to KICK.");
-                this.action = Action.KICK;
-            }
-
-            String serverName = BungeeAFK.getConfig().getString("afk-server-name");
-            if (!checkServerAvailable(serverName)) {
-                LOGGER.warn("AFK server not found. Defaulting to KICK.");
-                this.action = Action.KICK;
-            }
-        }
-
-        scheduler.scheduleAtFixedRate(() -> {
-            for (BAFKPlayer<?> player : BungeePlayer.getOnlinePlayers()) {
-                if (!(player instanceof BungeePlayer bungeePlayer)) continue;
-                long timeUntilAfk = calculateTimeUntilAfk(bungeePlayer);
-
-                handleWarning(bungeePlayer, timeUntilAfk);
-                handleAfkStatus(bungeePlayer, timeUntilAfk);
-                handleAction(bungeePlayer);
+                    updateTimeSinceLastAction(bungeePlayer);
+                    handleWarning(bungeePlayer);
+                    handleAction(bungeePlayer);
+                    handleAfkStatus(bungeePlayer);
+                    sendActionBar(bungeePlayer);
+                }
+            } catch (Exception e) {
+                LOGGER.error("Error in AFK check task: ", e);
+                scheduledTask.cancel(false);
             }
         }, 0, 500, TimeUnit.MILLISECONDS);
 
@@ -80,24 +67,42 @@ public class BungeeAFKHandler implements net.fameless.core.handling.AFKHandler, 
     }
 
     @Override
+    public void shutdown() {
+        if (scheduledTask != null && !scheduledTask.isCancelled()) {
+            scheduledTask.cancel(true);
+        }
+        scheduler.shutdownNow();
+        LOGGER.info("AFK handler successfully shutdown.");
+    }
+
+    @Override
     public void setAction(Action action) {
         if (!action.isAvailable()) return;
         this.action = action;
+        PluginConfig.get().set("action", action.getIdentifier());
     }
 
     @Override
     public void setWarnDelayMillis(long delay) {
         this.warnDelay = delay;
+        PluginConfig.get().set("warning-delay", (int) (delay / 1000));
     }
 
     @Override
     public void setActionDelayMillis(long delay) {
         this.actionDelay = delay;
+        PluginConfig.get().set("action-delay", (int) (delay / 1000));
     }
 
     @Override
     public void setAfkDelayMillis(long delay) {
         this.afkDelay = delay;
+        PluginConfig.get().set("afk-delay", (int) (delay / 1000));
+    }
+
+    @Override
+    public long getWarnDelayMillis() {
+        return warnDelay;
     }
 
     @Override
@@ -105,41 +110,69 @@ public class BungeeAFKHandler implements net.fameless.core.handling.AFKHandler, 
         return afkDelay;
     }
 
-    private long calculateTimeUntilAfk(@NotNull BungeePlayer bungeePlayer) {
-        return bungeePlayer.getWhenToAfk() - System.currentTimeMillis();
+    @Override
+    public long getActionDelayMillis() {
+        return actionDelay;
     }
 
-    private void handleWarning(@NotNull BungeePlayer bungeePlayer, long timeUntilAfk) {
-        long timeSinceLastAction = bungeePlayer.getTimeSinceLastAction();
-        timeSinceLastAction += 500;
-        if (timeSinceLastAction >= warnDelay && timeUntilAfk > 0 && !WARNED.contains(bungeePlayer)) {
-            bungeePlayer.sendMessage(Caption.of("notification.afk_warning"));
-            WARNED.add(bungeePlayer);
+    @Override
+    public void updateConfigValues() {
+        this.warnDelay = PluginConfig.get().getInt("warning-delay", 300) * 1000L;
+        this.afkDelay = PluginConfig.get().getInt("afk-delay", 600) * 1000L;
+        this.actionDelay = PluginConfig.get().getInt("action-delay", 630) * 1000L;
+
+        try {
+            this.action = Action.fromIdentifier(PluginConfig.get().getString("action", ""));
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("Invalid action identifier in config. Defaulting to KICK.");
+            this.action = Action.KICK;
         }
-        bungeePlayer.setTimeSinceLastAction(timeSinceLastAction);
+
+        if (action.equals(Action.CONNECT)) {
+            String serverName = PluginConfig.get().getString("afk-server-name", "");
+
+            if (!checkServerAvailable(serverName)) {
+                LOGGER.warn("AFK server not found. Defaulting to KICK.");
+                this.action = Action.KICK;
+            }
+        }
     }
 
-    private void handleAfkStatus(@NotNull BungeePlayer bungeePlayer, long timeUntilAfk) {
-        boolean newAfk = timeUntilAfk <= 0;
+    private void updateTimeSinceLastAction(@NotNull BungeePlayer player) {
+        long timeSinceLastAction = player.getTimeSinceLastAction();
+        if (timeSinceLastAction < 0) {
+            timeSinceLastAction = 0;
+        }
+        player.setTimeSinceLastAction(timeSinceLastAction + 500);
+    }
 
-        if (bungeePlayer.isAfk() && !newAfk) {
-            playerAfkTimeMap.remove(bungeePlayer);
-            bungeePlayer.sendMessage(Caption.of("notification.afk_return"));
-        } else if (!bungeePlayer.isAfk() && newAfk) {
-            playerAfkTimeMap.put(bungeePlayer, System.currentTimeMillis());
+    private void handleWarning(@NotNull BungeePlayer bungeePlayer) {
+        if (bungeePlayer.getAfkState() != AFKState.ACTIVE) return;
+        long timeSinceLastAction = bungeePlayer.getTimeSinceLastAction();
+        if (timeSinceLastAction >= warnDelay) {
+            bungeePlayer.sendMessage(Caption.of("notification.afk_warning"));
+            bungeePlayer.setAfkState(AFKState.WARNED);
+        }
+    }
+
+    private void handleAfkStatus(@NotNull BungeePlayer bungeePlayer) {
+        if (bungeePlayer.getAfkState() != AFKState.WARNED) return;
+        long timeSinceLastAction = bungeePlayer.getTimeSinceLastAction();
+
+        if (timeSinceLastAction >= afkDelay) {
+            bungeePlayer.setAfkState(AFKState.AFK);
+
+            long timeUntilAction = Math.max(0, actionDelay - afkDelay);
             bungeePlayer.sendMessage(Caption.of(
                     action.getMessageKey(),
-                    TagResolver.resolver("action-delay", Tag.inserting(Component.text(Format.formatTime((int) (actionDelay / 1000)))))));
-        }
-
-        bungeePlayer.setAfk(newAfk);
-        if (newAfk) {
-            WARNED.remove(bungeePlayer);
+                    TagResolver.resolver("action-delay", Tag.inserting(Component.text(Format.formatTime((int) (timeUntilAction / 1000)))))
+            ));
+            LOGGER.info("Player {} is now AFK.", bungeePlayer.getName());
         }
     }
 
     private void handleAction(@NotNull BungeePlayer bungeePlayer) {
-        if (action.equals(Action.NOTHING)) return;
+        long timeSinceLastAction = bungeePlayer.getTimeSinceLastAction();
 
         Optional<ProxiedPlayer> platformPlayerOptional = bungeePlayer.getPlatformPlayer();
         if (platformPlayerOptional.isEmpty()) return;
@@ -147,37 +180,43 @@ public class BungeeAFKHandler implements net.fameless.core.handling.AFKHandler, 
 
         Server playerServer = platformPlayer.getServer();
         if (playerServer == null) return;
-        if (bungeePlayer.isAfk()) {
-            long timeSinceAfk = System.currentTimeMillis() - playerAfkTimeMap.get(bungeePlayer);
-            switch (this.action) {
-                case CONNECT -> {
-                    if (!Action.isAfkServerConfigured()) {
-                        LOGGER.warn("AFK server not found. Defaulting to KICK.");
 
-                        this.action = Action.KICK;
-                        if (timeSinceAfk > actionDelay) {
-                            platformPlayer.disconnect(BungeeComponentSerializer.get().serialize(Caption.of("notification.afk_kick")));
-                            LOGGER.info("Kicked " + bungeePlayer.getName() + " for being AFK.");
-                        }
-                        return;
-                    }
-
-                    if (timeSinceAfk > actionDelay && !playerServer.getInfo().getName().equals(BungeeAFK.getConfig().getString("afk-server-name"))) {
-                        playerLastServerMap.put(bungeePlayer, playerServer.getInfo().getName());
-                        bungeePlayer.connect(BungeeAFK.getConfig().getString("afk-server-name"));
-                        bungeePlayer.sendMessage(Caption.of("notification.afk_disconnect"));
-                        LOGGER.info("Moved " + bungeePlayer.getName() + " to AFK server.");
-                    }
-                }
-                case KICK -> {
-                    if (timeSinceAfk > actionDelay) {
-                        platformPlayer.disconnect(BungeeComponentSerializer.get().serialize(Caption.of("notification.afk_kick")));
-                        LOGGER.info("Kicked " + bungeePlayer.getName() + " for being AFK.");
-                    }
-                }
-            }
-        } else if (!bungeePlayer.isAfk() && playerServer.getInfo().getName().equalsIgnoreCase(BungeeAFK.getConfig().getString("afk-server-name"))) {
+        if (bungeePlayer.getAfkState() != AFKState.ACTION_TAKEN && playerServer.getInfo().getName().equalsIgnoreCase(PluginConfig.get().getString("afk-server-name", ""))) {
             bungeePlayer.connect(playerLastServerMap.getOrDefault(bungeePlayer, "lobby"));
+            return;
+        }
+
+        if (action.equals(Action.NOTHING)) return;
+        if (bungeePlayer.getAfkState() != AFKState.AFK) return;
+        if (timeSinceLastAction < actionDelay) return;
+
+        switch (action) {
+            case CONNECT -> {
+                if (!Action.isAfkServerConfigured()) {
+                    LOGGER.warn("AFK server not found. Defaulting to KICK.");
+
+                    this.action = Action.KICK;
+                    platformPlayer.disconnect(BungeeComponentSerializer.get().serialize(Caption.of("notification.afk_kick")));
+                    LOGGER.info("Kicked {} for being AFK.", bungeePlayer.getName());
+                    return;
+                }
+
+                playerLastServerMap.put(bungeePlayer, playerServer.getInfo().getName());
+                bungeePlayer.connect(PluginConfig.get().getString("afk-server-name"));
+                bungeePlayer.sendMessage(Caption.of("notification.afk_disconnect"));
+                LOGGER.info("Moved {} to AFK server.", bungeePlayer.getName());
+            }
+            case KICK -> {
+                platformPlayer.disconnect(BungeeComponentSerializer.get().serialize(Caption.of("notification.afk_kick")));
+                LOGGER.info("Kicked {} for being AFK.", bungeePlayer.getName());
+            }
+        }
+        bungeePlayer.setAfkState(AFKState.ACTION_TAKEN);
+    }
+
+    private void sendActionBar(@NotNull BungeePlayer bungeePlayer) {
+        if (bungeePlayer.getAfkState() == AFKState.AFK || bungeePlayer.getAfkState() == AFKState.ACTION_TAKEN) {
+            bungeePlayer.sendActionbar(Caption.of("actionbar.afk"));
         }
     }
 
@@ -187,7 +226,9 @@ public class BungeeAFKHandler implements net.fameless.core.handling.AFKHandler, 
 
     @EventHandler
     public void onPostLogin(@NotNull PostLoginEvent event) {
-        BungeePlayer.adapt(event.getPlayer()).updateWhenToAfk();
+        BungeePlayer bungeePlayer = BungeePlayer.adapt(event.getPlayer());
+        bungeePlayer.setTimeSinceLastAction(0);
+        bungeePlayer.setAfkState(AFKState.ACTIVE);
     }
 
     @EventHandler
@@ -202,11 +243,14 @@ public class BungeeAFKHandler implements net.fameless.core.handling.AFKHandler, 
         String status = parts[1];
 
         if (status.equals("action_caught")) {
-            BungeePlayer player = BungeePlayer.adapt(playerUUID).orElse(null);
-            if (player == null) return;
-            player.updateWhenToAfk();
-            player.setTimeSinceLastAction(0);
-            WARNED.remove(player);
+            BungeePlayer bungeePlayer = BungeePlayer.adapt(playerUUID).orElse(null);
+            if (bungeePlayer == null) return;
+
+            if (bungeePlayer.getAfkState() == AFKState.ACTION_TAKEN || bungeePlayer.getAfkState() == AFKState.AFK) {
+                bungeePlayer.sendMessage(Caption.of("notification.afk_return"));
+            }
+            bungeePlayer.setTimeSinceLastAction(0);
+            bungeePlayer.setAfkState(AFKState.ACTIVE);
         }
     }
 }

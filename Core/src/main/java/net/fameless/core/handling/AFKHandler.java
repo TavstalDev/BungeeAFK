@@ -4,6 +4,8 @@ public interface AFKHandler {
 
     void init();
 
+    void shutdown();
+
     void setAction(Action action);
 
     void setWarnDelayMillis(long delay);
@@ -12,6 +14,12 @@ public interface AFKHandler {
 
     void setAfkDelayMillis(long delay);
 
+    long getWarnDelayMillis();
+
     long getAfkDelayMillis();
+
+    long getActionDelayMillis();
+
+    void updateConfigValues();
 
 }

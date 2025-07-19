@@ -30,6 +30,10 @@ tasks {
     }
 
     shadowJar {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        exclude("META-INF/LICENSE*")
+        exclude("META-INF/NOTICE*")
+
         archiveBaseName.set("BungeeAFK-Spigot")
         archiveClassifier.set("")
         archiveVersion.set("1.1.0")

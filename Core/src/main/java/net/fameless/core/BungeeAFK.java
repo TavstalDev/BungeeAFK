@@ -7,8 +7,8 @@ import com.google.inject.Stage;
 import net.fameless.core.caption.Caption;
 import net.fameless.core.caption.Language;
 import net.fameless.core.command.framework.Command;
+import net.fameless.core.config.PluginConfig;
 import net.fameless.core.handling.AFKHandler;
-import net.fameless.core.inject.PlatformConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,7 @@ public class BungeeAFK {
     private static boolean initialized = false;
     private static BungeeAFKPlatform platform;
     private static Injector injector;
-    private static PlatformConfig config;
+    private static AFKHandler afkHandler;
 
     public static synchronized void initCore(AbstractModule platformModule) {
         if (initialized) {
@@ -30,13 +30,16 @@ public class BungeeAFK {
                 platformModule
         );
 
+        PluginConfig.init();
+
         platform = injector.getInstance(BungeeAFKPlatform.class);
-        config = injector.getInstance(PlatformConfig.class);
-        injector.getInstance(AFKHandler.class).init();
+        afkHandler = injector.getInstance(AFKHandler.class);
+        afkHandler.init();
+
         Command.init();
 
         Caption.loadDefaultLanguages();
-        Caption.setCurrentLanguage(Language.ofIdentifier(config.getString("lang", "en")));
+        Caption.setCurrentLanguage(Language.ofIdentifier(PluginConfig.get().getString("lang", "en")));
 
         initialized = true;
         LOGGER.info("BungeeAFK Core initialized successfully.");
@@ -45,14 +48,12 @@ public class BungeeAFK {
     public static void handleShutdown() {
         if (!initialized) return;
         Caption.saveToFile();
+        PluginConfig.handleShutdown();
+        afkHandler.shutdown();
     }
 
     public static Injector injector() {
         return injector;
-    }
-
-    public static PlatformConfig getConfig() {
-        return config;
     }
 
     public static BungeeAFKPlatform platform() {

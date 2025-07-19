@@ -1,6 +1,7 @@
 package net.fameless.core.handling;
 
 import net.fameless.core.BungeeAFK;
+import net.fameless.core.config.PluginConfig;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -30,12 +31,22 @@ public enum Action {
     }
 
     public static boolean isAfkServerConfigured() {
-        if (!BungeeAFK.getConfig().contains("afk-server-name")) {
+        if (!PluginConfig.get().contains("afk-server-name")) {
             return false;
         }
 
-        String serverName = BungeeAFK.getConfig().getString("afk-server-name");
+        String serverName = PluginConfig.get().getString("afk-server-name");
         return BungeeAFK.platform().doesServerExist(serverName);
+    }
+
+    public static @NotNull List<Action> getAvailableActions() {
+        List<Action> availableActions = new ArrayList<>();
+        for (Action action : values()) {
+            if (action.isAvailable()) {
+                availableActions.add(action);
+            }
+        }
+        return availableActions;
     }
 
     public static @NotNull Action fromIdentifier(String identifier) throws IllegalArgumentException {

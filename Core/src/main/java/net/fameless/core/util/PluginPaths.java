@@ -15,4 +15,8 @@ public class PluginPaths {
         return new File(BASE_FOLDER, "lang/lang_" + language.getIdentifier() + ".json");
     }
 
+    public static @NotNull File getConfigFile() {
+        return new File(BASE_FOLDER, "config.yml");
+    }
+
 }

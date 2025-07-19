@@ -1,9 +1,8 @@
 package net.fameless.core.player;
 
-import net.fameless.core.BungeeAFK;
-import net.fameless.core.caption.Caption;
 import net.fameless.core.command.framework.CommandCaller;
-import net.fameless.core.handling.AFKHandler;
+import net.fameless.core.config.PluginConfig;
+import net.fameless.core.handling.AFKState;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -20,13 +19,11 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
 
     protected String name;
     private final UUID uuid;
-    private boolean afk;
-    private long whenToAfk;
     private long timeSinceLastAction = 0;
+    private AFKState afkState;
 
     public BAFKPlayer(UUID uuid) {
         this.uuid = uuid;
-        updateWhenToAfk();
         PLAYERS.add(this);
     }
 
@@ -50,32 +47,13 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
 
     public static @NotNull List<BAFKPlayer<?>> getOnlinePlayers() {
         List<BAFKPlayer<?>> onlinePlayers = new ArrayList<>();
-        for (BAFKPlayer<?> battlePlayer : PLAYERS) {
-            if (battlePlayer.isOffline()) {
+        for (BAFKPlayer<?> bafkPlayer : PLAYERS) {
+            if (bafkPlayer.isOffline()) {
                 continue;
             }
-            onlinePlayers.add(battlePlayer);
+            onlinePlayers.add(bafkPlayer);
         }
         return onlinePlayers;
-    }
-
-    public void updateWhenToAfk() {
-        this.whenToAfk = System.currentTimeMillis() + BungeeAFK.injector().getInstance(AFKHandler.class).getAfkDelayMillis();
-    }
-
-    public boolean isAfk() {
-        return afk;
-    }
-
-    public void setAfk(boolean afk) {
-        this.afk = afk;
-        if (afk) {
-            sendActionbar(Caption.of("actionbar.afk"));
-        }
-    }
-
-    public long getWhenToAfk() {
-        return whenToAfk;
     }
 
     public UUID getUniqueId() {
@@ -88,6 +66,17 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
 
     public void setTimeSinceLastAction(long timeSinceLastAction) {
         this.timeSinceLastAction = timeSinceLastAction;
+    }
+
+    public AFKState getAfkState() {
+        if (PluginConfig.get().getBoolean("allow-bypass") && hasPermission("bungeeafk.bypass")) {
+            return AFKState.BYPASS;
+        }
+        return afkState;
+    }
+
+    public void setAfkState(AFKState afkState) {
+        this.afkState = afkState;
     }
 
     public void sendMessage(Component message) {

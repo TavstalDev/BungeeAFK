@@ -7,6 +7,7 @@ import net.fameless.core.caption.Language;
 import net.fameless.core.command.framework.CallerType;
 import net.fameless.core.command.framework.Command;
 import net.fameless.core.command.framework.CommandCaller;
+import net.fameless.core.config.PluginConfig;
 import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.handling.Action;
 import net.fameless.core.util.StringUtil;
@@ -38,6 +39,24 @@ public class MainCommand extends Command {
         if (args[0].equalsIgnoreCase("configure")) {
             AFKHandler afkHandler = BungeeAFK.injector().getInstance(AFKHandler.class);
             switch (args[1]) {
+                case "allow-bypass" -> {
+                    if (args.length < 3) {
+                        sendUsage(caller);
+                        return;
+                    }
+                    boolean allowBypass;
+                    try {
+                        allowBypass = Boolean.parseBoolean(args[2]);
+                    } catch (IllegalArgumentException e) {
+                        caller.sendMessage(Caption.of("command.invalid_boolean"));
+                        return;
+                    }
+
+                    PluginConfig.get().set("allow-bypass", allowBypass);
+                    caller.sendMessage(Caption.of("command.bypass_set",
+                            TagResolver.resolver("allow", Tag.inserting(Component.text(allowBypass)))
+                    ));
+                }
                 case "warn-delay" -> {
                     if (args.length < 3) {
                         sendUsage(caller);
@@ -152,6 +171,11 @@ public class MainCommand extends Command {
                             TagResolver.resolver("caption", Tag.inserting(Component.text(Caption.getString(language, captionKey))))
                     ));
                 }
+                case "reloadconfig" -> {
+                    PluginConfig.handleReload();
+                    afkHandler.updateConfigValues();
+                    caller.sendMessage(Caption.of("command.config_reloaded"));
+                }
             }
         } else if (args[0].equalsIgnoreCase("lang")) {
             if (args[1].equalsIgnoreCase("reload")) {
@@ -181,7 +205,15 @@ public class MainCommand extends Command {
             completions.addAll(Arrays.asList("configure", "lang"));
         } else if (args.length == 2) {
             if (args[0].equalsIgnoreCase("configure")) {
-                completions.addAll(Arrays.asList("afk-delay", "action-delay", "action", "caption"));
+                completions.addAll(Arrays.asList(
+                        "afk-delay",
+                        "action-delay",
+                        "action",
+                        "caption",
+                        "warn-delay",
+                        "allow-bypass",
+                        "reloadconfig"
+                ));
             } else if (args[0].equalsIgnoreCase("lang")) {
                 completions.add("reload");
                 for (Language language : Language.values()) {
@@ -191,15 +223,19 @@ public class MainCommand extends Command {
         } else if (args.length == 3) {
             if (args[0].equalsIgnoreCase("configure")) {
                 if (args[1].equalsIgnoreCase("action")) {
-                    for (Action action : Action.values()) {
+                    for (Action action : Action.getAvailableActions()) {
                         completions.add(action.getIdentifier());
                     }
-                } else if (args[1].equalsIgnoreCase("afk-delay") || args[1].equalsIgnoreCase("action-delay")) {
+                } else if (args[1].equalsIgnoreCase("afk-delay")
+                        || args[1].equalsIgnoreCase("action-delay")
+                        || args[1].equalsIgnoreCase("warn-delay")) {
                     completions.add("<seconds>");
                 } else if (args[1].equalsIgnoreCase("caption")) {
                     for (Language language : Language.values()) {
                         completions.add(language.getIdentifier());
                     }
+                } else if (args[1].equalsIgnoreCase("allow-bypass")) {
+                    completions.addAll(Arrays.asList("true", "false"));
                 }
             }
         } else if (args.length == 4) {

@@ -1,14 +1,16 @@
 lang: en
 
 # Delay after which the warning message is sent to the player (seconds) | Lang entry: "notification.afk_warning"
-# e.g., if set to 60, the player will receive a warning message after 1 minute of inactivity
-warning-delay: 60
+# e.g., if set to 300, the player will receive a warning message after 5 minutes of inactivity
+warning-delay: 300
 
 # Delay after which a player is marked as AFK (seconds)
+# e.g., if set to 600, the player will be marked as AFK after 10 minutes of inactivity
 afk-delay: 600
 
 # Delay after which a player marked as AFK is connected to the AFK server (seconds)
-action-delay: 30
+# e.g., if set to 630, the player will be connected to the AFK server or kicked after 10 minutes and 30 seconds of inactivity
+action-delay: 630
 
 # Action to be performed after action delay is reached. Possible values: "kick", "connect", "nothing".
 # "kick" - player is kicked from the server
@@ -17,4 +19,8 @@ action-delay: 30
 action: "kick"
 
 # Server name to which the player is connected when the action is set to "connect"
-# afk-server-name: "afk"
+# !!! Only available for BungeeCord and Velocity !!!
+afk-server-name: "afk"
+
+# Whether to allow bypass of AFK detection for players with the "afk.bypass" permission
+allow-bypass: true
