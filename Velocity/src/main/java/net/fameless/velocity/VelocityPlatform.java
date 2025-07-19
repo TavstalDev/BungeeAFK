@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 @Plugin(
     id = "bungeeafk",
     name = "BungeeAFK-Velocity",
-    version = "1.0.0"
+    version = "1.1.0"
     ,description = "BungeeAFK for Velocity proxy"
     ,url = "https://github.com/Fameless9"
     ,authors = {"Fameless9"}
