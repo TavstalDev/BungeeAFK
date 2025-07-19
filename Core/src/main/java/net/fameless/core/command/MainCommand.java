@@ -38,6 +38,26 @@ public class MainCommand extends Command {
         if (args[0].equalsIgnoreCase("configure")) {
             AFKHandler afkHandler = BungeeAFK.injector().getInstance(AFKHandler.class);
             switch (args[1]) {
+                case "warn-delay" -> {
+                    if (args.length < 3) {
+                        sendUsage(caller);
+                        return;
+                    }
+
+                    long delay;
+                    try {
+                        int delaySeconds = Integer.parseInt(args[2]);
+                        delay = delaySeconds * 1000L;
+                    } catch (NumberFormatException e) {
+                        caller.sendMessage(Caption.of("command.invalid_number"));
+                        return;
+                    }
+                    afkHandler.setWarnDelayMillis(delay);
+                    caller.sendMessage(Caption.of(
+                            "command.warn_delay_set",
+                            TagResolver.resolver("delay", Tag.inserting(Component.text(delay / 1000)))
+                    ));
+                }
                 case "afk-delay" -> {
                     if (args.length < 3) {
                         sendUsage(caller);

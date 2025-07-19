@@ -22,6 +22,7 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
     private final UUID uuid;
     private boolean afk;
     private long whenToAfk;
+    private long timeSinceLastAction = 0;
 
     public BAFKPlayer(UUID uuid) {
         this.uuid = uuid;
@@ -79,6 +80,14 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
 
     public UUID getUniqueId() {
         return uuid;
+    }
+
+    public long getTimeSinceLastAction() {
+        return timeSinceLastAction;
+    }
+
+    public void setTimeSinceLastAction(long timeSinceLastAction) {
+        this.timeSinceLastAction = timeSinceLastAction;
     }
 
     public void sendMessage(Component message) {

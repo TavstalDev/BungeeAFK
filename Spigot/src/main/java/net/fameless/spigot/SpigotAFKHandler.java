@@ -27,11 +27,11 @@ import java.util.concurrent.TimeUnit;
 public class SpigotAFKHandler implements AFKHandler, Listener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + SpigotAFKHandler.class.getSimpleName());
-    private final long warningTime = 60 * 1000L;
     private final List<BAFKPlayer<?>> WARNED = new ArrayList<>();
     private final Map<BAFKPlayer<?>, Long> playerAfkTimeMap = new HashMap<>();
 
     private Action action;
+    private long warnDelay;
     private long actionDelay;
     private long afkDelay;
 
@@ -39,6 +39,7 @@ public class SpigotAFKHandler implements AFKHandler, Listener {
 
     @Override
     public void init() {
+        this.warnDelay = BungeeAFK.getConfig().getInt("warning-delay", 60) * 1000L;
         this.actionDelay = BungeeAFK.getConfig().getInt("action-delay", 30) * 1000L;
         this.afkDelay = BungeeAFK.getConfig().getInt("afk-delay", 600) * 1000L;
 
@@ -68,6 +69,11 @@ public class SpigotAFKHandler implements AFKHandler, Listener {
     }
 
     @Override
+    public void setWarnDelayMillis(long delay) {
+        this.warnDelay = delay;
+    }
+
+    @Override
     public void setActionDelayMillis(long delay) {
         this.actionDelay = delay;
     }
@@ -86,11 +92,14 @@ public class SpigotAFKHandler implements AFKHandler, Listener {
         return spigotPlayer.getWhenToAfk() - System.currentTimeMillis();
     }
 
-    private void handleWarning(SpigotPlayer spigotPlayer, long timeUntilAfk) {
-        if (timeUntilAfk <= warningTime && timeUntilAfk > 0 && !WARNED.contains(spigotPlayer)) {
+    private void handleWarning(@NotNull SpigotPlayer spigotPlayer, long timeUntilAfk) {
+        long timeSinceLastAction = spigotPlayer.getTimeSinceLastAction();
+        timeSinceLastAction += 500;
+        if (timeSinceLastAction >= warnDelay && timeUntilAfk > 0 && !WARNED.contains(spigotPlayer)) {
             spigotPlayer.sendMessage(Caption.of("notification.afk_warning"));
             WARNED.add(spigotPlayer);
         }
+        spigotPlayer.setTimeSinceLastAction(timeSinceLastAction);
     }
 
     private void handleAfkStatus(@NotNull SpigotPlayer spigotPlayer, long timeUntilAfk) {
@@ -123,6 +132,12 @@ public class SpigotAFKHandler implements AFKHandler, Listener {
         }
     }
 
+    private void actionCaught(@NotNull SpigotPlayer player) {
+        player.updateWhenToAfk();
+        player.setTimeSinceLastAction(0);
+        WARNED.remove(player);
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
         SpigotPlayer.adapt(event.getPlayer());
@@ -131,17 +146,17 @@ public class SpigotAFKHandler implements AFKHandler, Listener {
     @EventHandler
     public void onMove(@NotNull PlayerMoveEvent event) {
         if (!event.getFrom().equals(event.getTo())) {
-            SpigotPlayer.adapt(event.getPlayer()).updateWhenToAfk();
+            actionCaught(SpigotPlayer.adapt(event.getPlayer()));
         }
     }
 
     @EventHandler
     public void onChat(@NotNull AsyncPlayerChatEvent event) {
-        SpigotPlayer.adapt(event.getPlayer()).updateWhenToAfk();
+        actionCaught(SpigotPlayer.adapt(event.getPlayer()));
     }
 
     @EventHandler
     public void onInteract(@NotNull PlayerInteractEvent event) {
-        SpigotPlayer.adapt(event.getPlayer()).updateWhenToAfk();
+        actionCaught(SpigotPlayer.adapt(event.getPlayer()));
     }
 }

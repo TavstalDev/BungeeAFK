@@ -6,6 +6,8 @@ public interface AFKHandler {
 
     void setAction(Action action);
 
+    void setWarnDelayMillis(long delay);
+
     void setActionDelayMillis(long delay);
 
     void setAfkDelayMillis(long delay);

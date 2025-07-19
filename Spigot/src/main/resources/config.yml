@@ -1,5 +1,9 @@
 lang: en
 
+# Delay after which the warning message is sent to the player (seconds) | Lang entry: "notification.afk_warning"
+# e.g., if set to 60, the player will receive a warning message after 1 minute of inactivity
+warning-delay: 60
+
 # Delay after which a player is marked as AFK (seconds)
 afk-delay: 600
 
