@@ -124,6 +124,7 @@ public class MainCommand extends Command {
 
                     languageJsonObject.addProperty(captionKey, String.join(" ", Arrays.copyOfRange(args, 4, args.length)));
                     Caption.loadLanguage(language, languageJsonObject);
+                    Caption.saveToFile();
 
                     caller.sendMessage(Caption.of("command.caption_set",
                             TagResolver.resolver("language", Tag.inserting(Component.text(language.getIdentifier()))),

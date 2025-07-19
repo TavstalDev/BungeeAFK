@@ -44,7 +44,7 @@ public class BungeeAFK {
 
     public static void handleShutdown() {
         if (!initialized) return;
-        Caption.handleShutdown();
+        Caption.saveToFile();
     }
 
     public static Logger getLogger() {

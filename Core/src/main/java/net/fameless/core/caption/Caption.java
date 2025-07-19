@@ -97,7 +97,7 @@ public final class Caption {
         }
     }
 
-    public static void handleShutdown() {
+    public static void saveToFile() {
         for (Language language : Language.values()) {
             File langFile = PluginPaths.getLangFile(language);
             JsonObject jsonObject = languageJsonObjectHashMap.get(language);
