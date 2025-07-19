@@ -17,7 +17,7 @@ import java.nio.file.Path;
 @Plugin(
     id = "bungeeafk",
     name = "BungeeAFK-Velocity",
-    version = "1.1.0"
+    version = "2.0.0"
     ,description = "BungeeAFK for Velocity proxy"
     ,url = "https://github.com/Fameless9"
     ,authors = {"Fameless9"}
