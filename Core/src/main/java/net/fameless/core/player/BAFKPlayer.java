@@ -101,5 +101,7 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
 
     public abstract void connect(String serverName);
 
+    public abstract void kick(Component reason);
+
     public abstract boolean hasPermission(String permission);
 }

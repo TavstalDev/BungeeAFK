@@ -6,10 +6,6 @@ import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.handling.AFKState;
 import net.fameless.core.handling.Action;
 import net.fameless.core.player.BAFKPlayer;
-import net.fameless.core.util.Format;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.Tag;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
@@ -18,8 +14,6 @@ import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -27,15 +21,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class BungeeAFKHandler implements AFKHandler, Listener {
+public class BungeeAFKHandler extends AFKHandler implements Listener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + BungeeAFKHandler.class.getSimpleName());
     private final Map<BAFKPlayer<?>, String> playerLastServerMap = new HashMap<>();
-
-    private Action action;
-    private long warnDelay;
-    private long actionDelay;
-    private long afkDelay;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> scheduledTask;
@@ -76,102 +64,9 @@ public class BungeeAFKHandler implements AFKHandler, Listener {
     }
 
     @Override
-    public void setAction(Action action) {
-        if (!action.isAvailable()) return;
-        this.action = action;
-        PluginConfig.get().set("action", action.getIdentifier());
-    }
+    protected void handleAction(@NotNull BAFKPlayer<?> bafkPlayer) {
+        if (!(bafkPlayer instanceof BungeePlayer bungeePlayer)) return;
 
-    @Override
-    public void setWarnDelayMillis(long delay) {
-        this.warnDelay = delay;
-        PluginConfig.get().set("warning-delay", (int) (delay / 1000));
-    }
-
-    @Override
-    public void setActionDelayMillis(long delay) {
-        this.actionDelay = delay;
-        PluginConfig.get().set("action-delay", (int) (delay / 1000));
-    }
-
-    @Override
-    public void setAfkDelayMillis(long delay) {
-        this.afkDelay = delay;
-        PluginConfig.get().set("afk-delay", (int) (delay / 1000));
-    }
-
-    @Override
-    public long getWarnDelayMillis() {
-        return warnDelay;
-    }
-
-    @Override
-    public long getAfkDelayMillis() {
-        return afkDelay;
-    }
-
-    @Override
-    public long getActionDelayMillis() {
-        return actionDelay;
-    }
-
-    @Override
-    public void updateConfigValues() {
-        this.warnDelay = PluginConfig.get().getInt("warning-delay", 300) * 1000L;
-        this.afkDelay = PluginConfig.get().getInt("afk-delay", 600) * 1000L;
-        this.actionDelay = PluginConfig.get().getInt("action-delay", 630) * 1000L;
-
-        try {
-            this.action = Action.fromIdentifier(PluginConfig.get().getString("action", ""));
-        } catch (IllegalArgumentException e) {
-            LOGGER.warn("Invalid action identifier in config. Defaulting to KICK.");
-            this.action = Action.KICK;
-        }
-
-        if (action.equals(Action.CONNECT)) {
-            String serverName = PluginConfig.get().getString("afk-server-name", "");
-
-            if (!checkServerAvailable(serverName)) {
-                LOGGER.warn("AFK server not found. Defaulting to KICK.");
-                this.action = Action.KICK;
-            }
-        }
-    }
-
-    private void updateTimeSinceLastAction(@NotNull BungeePlayer player) {
-        long timeSinceLastAction = player.getTimeSinceLastAction();
-        if (timeSinceLastAction < 0) {
-            timeSinceLastAction = 0;
-        }
-        player.setTimeSinceLastAction(timeSinceLastAction + 500);
-    }
-
-    private void handleWarning(@NotNull BungeePlayer bungeePlayer) {
-        if (bungeePlayer.getAfkState() != AFKState.ACTIVE) return;
-        long timeSinceLastAction = bungeePlayer.getTimeSinceLastAction();
-        if (timeSinceLastAction >= warnDelay) {
-            bungeePlayer.sendMessage(Caption.of("notification.afk_warning"));
-            bungeePlayer.setAfkState(AFKState.WARNED);
-        }
-    }
-
-    private void handleAfkStatus(@NotNull BungeePlayer bungeePlayer) {
-        if (bungeePlayer.getAfkState() != AFKState.WARNED) return;
-        long timeSinceLastAction = bungeePlayer.getTimeSinceLastAction();
-
-        if (timeSinceLastAction >= afkDelay) {
-            bungeePlayer.setAfkState(AFKState.AFK);
-
-            long timeUntilAction = Math.max(0, actionDelay - afkDelay);
-            bungeePlayer.sendMessage(Caption.of(
-                    action.getMessageKey(),
-                    TagResolver.resolver("action-delay", Tag.inserting(Component.text(Format.formatTime((int) (timeUntilAction / 1000)))))
-            ));
-            LOGGER.info("Player {} is now AFK.", bungeePlayer.getName());
-        }
-    }
-
-    private void handleAction(@NotNull BungeePlayer bungeePlayer) {
         long timeSinceLastAction = bungeePlayer.getTimeSinceLastAction();
 
         Optional<ProxiedPlayer> platformPlayerOptional = bungeePlayer.getPlatformPlayer();
@@ -212,16 +107,6 @@ public class BungeeAFKHandler implements AFKHandler, Listener {
             }
         }
         bungeePlayer.setAfkState(AFKState.ACTION_TAKEN);
-    }
-
-    private void sendActionBar(@NotNull BungeePlayer bungeePlayer) {
-        if (bungeePlayer.getAfkState() == AFKState.AFK || bungeePlayer.getAfkState() == AFKState.ACTION_TAKEN) {
-            bungeePlayer.sendActionbar(Caption.of("actionbar.afk"));
-        }
-    }
-
-    private boolean checkServerAvailable(String serverName) {
-        return BungeePlatform.proxyServer().getServerInfo(serverName) != null;
     }
 
     @EventHandler

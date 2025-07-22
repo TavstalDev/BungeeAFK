@@ -4,6 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 import net.fameless.core.command.framework.CallerType;
 import net.fameless.core.player.BAFKPlayer;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -89,6 +90,12 @@ public class VelocityPlayer extends BAFKPlayer<Player> {
     public void connect(String serverName) {
         Optional<Player> platformPlayer = getPlatformPlayer();
         platformPlayer.ifPresent(player -> player.createConnectionRequest(VelocityPlatform.getProxy().getServer(serverName).orElseThrow()).fireAndForget());
+    }
+
+    @Override
+    public void kick(Component reason) {
+        Optional<Player> platformPlayer = getPlatformPlayer();
+        platformPlayer.ifPresent(player -> player.disconnect(reason));
     }
 
     @Override

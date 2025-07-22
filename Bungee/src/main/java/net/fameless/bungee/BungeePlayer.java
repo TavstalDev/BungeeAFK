@@ -3,6 +3,8 @@ package net.fameless.bungee;
 import net.fameless.core.command.framework.CallerType;
 import net.fameless.core.player.BAFKPlayer;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.jetbrains.annotations.NotNull;
 
@@ -98,6 +100,12 @@ public class BungeePlayer extends BAFKPlayer<ProxiedPlayer> {
     public void connect(String serverName) {
         Optional<ProxiedPlayer> platformPlayer = getPlatformPlayer();
         platformPlayer.ifPresent(player -> player.connect(BungeePlatform.get().getProxy().getServerInfo(serverName)));
+    }
+
+    @Override
+    public void kick(Component reason) {
+        Optional<ProxiedPlayer> platformPlayerOptional = getPlatformPlayer();
+        platformPlayerOptional.ifPresent(platformPlayer -> platformPlayer.disconnect(BungeeComponentSerializer.get().serialize(reason)));
     }
 
     @Override

@@ -12,13 +12,7 @@ import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.handling.AFKState;
 import net.fameless.core.handling.Action;
 import net.fameless.core.player.BAFKPlayer;
-import net.fameless.core.util.Format;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.Tag;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -26,15 +20,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class VelocityAFKHandler implements AFKHandler {
+public class VelocityAFKHandler extends AFKHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + VelocityAFKHandler.class.getSimpleName());
     private final Map<BAFKPlayer<?>, String> playerLastServerMap = new HashMap<>();
-
-    private Action action;
-    private long warnDelay;
-    private long afkDelay;
-    private long actionDelay;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> scheduledTask;
@@ -77,102 +65,9 @@ public class VelocityAFKHandler implements AFKHandler {
     }
 
     @Override
-    public void setAction(Action action) {
-        if (!action.isAvailable()) return;
-        this.action = action;
-        PluginConfig.get().set("action", action.getIdentifier());
-    }
+    protected void handleAction(@NotNull BAFKPlayer<?> bafkPlayer) {
+        if (!(bafkPlayer instanceof VelocityPlayer velocityPlayer)) return;
 
-    @Override
-    public void setWarnDelayMillis(long delay) {
-        this.warnDelay = delay;
-        PluginConfig.get().set("warning-delay", (int) (delay / 1000));
-    }
-
-    @Override
-    public void setActionDelayMillis(long delay) {
-        this.actionDelay = delay;
-        PluginConfig.get().set("action-delay", (int) (delay / 1000));
-    }
-
-    @Override
-    public void setAfkDelayMillis(long delay) {
-        this.afkDelay = delay;
-        PluginConfig.get().set("afk-delay", (int) (delay / 1000));
-    }
-
-    @Override
-    public long getWarnDelayMillis() {
-        return warnDelay;
-    }
-
-    @Override
-    public long getAfkDelayMillis() {
-        return afkDelay;
-    }
-
-    @Override
-    public long getActionDelayMillis() {
-        return actionDelay;
-    }
-
-    @Override
-    public void updateConfigValues() {
-        this.warnDelay = PluginConfig.get().getInt("warning-delay", 300) * 1000L;
-        this.afkDelay = PluginConfig.get().getInt("afk-delay", 600) * 1000L;
-        this.actionDelay = PluginConfig.get().getInt("action-delay", 630) * 1000L;
-
-        try {
-            this.action = Action.fromIdentifier(PluginConfig.get().getString("action", ""));
-        } catch (IllegalArgumentException e) {
-            LOGGER.warn("Invalid action identifier in config. Defaulting to KICK.");
-            this.action = Action.KICK;
-        }
-
-        if (action.equals(Action.CONNECT)) {
-            String serverName = PluginConfig.get().getString("afk-server-name", "");
-
-            if (!checkServerAvailable(serverName)) {
-                LOGGER.warn("AFK server not found. Defaulting to KICK.");
-                this.action = Action.KICK;
-            }
-        }
-    }
-
-    private void updateTimeSinceLastAction(@NotNull VelocityPlayer player) {
-        long timeSinceLastAction = player.getTimeSinceLastAction();
-        if (timeSinceLastAction < 0) {
-            timeSinceLastAction = 0;
-        }
-        player.setTimeSinceLastAction(timeSinceLastAction + 500);
-    }
-
-    private void handleWarning(@NotNull VelocityPlayer velocityPlayer) {
-        if (velocityPlayer.getAfkState() != AFKState.ACTIVE) return;
-        long timeSinceLastAction = velocityPlayer.getTimeSinceLastAction();
-        if (timeSinceLastAction >= warnDelay) {
-            velocityPlayer.sendMessage(Caption.of("notification.afk_warning"));
-            velocityPlayer.setAfkState(AFKState.WARNED);
-        }
-    }
-
-    private void handleAfkStatus(@NotNull VelocityPlayer velocityPlayer) {
-        if (velocityPlayer.getAfkState() != AFKState.WARNED) return;
-        long timeSinceLastAction = velocityPlayer.getTimeSinceLastAction();
-
-        if (timeSinceLastAction >= afkDelay) {
-            velocityPlayer.setAfkState(AFKState.AFK);
-
-            long timeUntilAction = Math.max(0, actionDelay - afkDelay);
-            velocityPlayer.sendMessage(Caption.of(
-                    action.getMessageKey(),
-                    TagResolver.resolver("action-delay", Tag.inserting(Component.text(Format.formatTime((int) (timeUntilAction / 1000)))))
-            ));
-            LOGGER.info("Player {} is now AFK.", velocityPlayer.getName());
-        }
-    }
-
-    private void handleAction(@NotNull VelocityPlayer velocityPlayer) {
         long timeSinceLastAction = velocityPlayer.getTimeSinceLastAction();
 
         Optional<Player> platformPlayerOptional = velocityPlayer.getPlatformPlayer();
@@ -214,16 +109,6 @@ public class VelocityAFKHandler implements AFKHandler {
             }
         }
         velocityPlayer.setAfkState(AFKState.ACTION_TAKEN);
-    }
-
-    private void sendActionBar(@NotNull VelocityPlayer velocityPlayer) {
-        if (velocityPlayer.getAfkState() == AFKState.AFK || velocityPlayer.getAfkState() == AFKState.ACTION_TAKEN) {
-            velocityPlayer.sendActionbar(Caption.of("actionbar.afk"));
-        }
-    }
-
-    private boolean checkServerAvailable(String serverName) {
-        return VelocityPlatform.getProxy().getServer(serverName).isPresent();
     }
 
     @Subscribe

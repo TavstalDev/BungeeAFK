@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -93,6 +92,7 @@ public class SpigotPlayer extends BAFKPlayer<Player> {
         // Not needed for SpigotPlatform
     }
 
+    @Override
     public void kick(Component reason) {
         getPlatformPlayer().ifPresent(player -> player.kickPlayer(LegacyComponentSerializer.legacySection().serialize(reason)));
     }
