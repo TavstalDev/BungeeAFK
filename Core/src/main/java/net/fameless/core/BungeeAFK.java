@@ -36,6 +36,8 @@ public class BungeeAFK {
         platform = injector.getInstance(BungeeAFKPlatform.class);
         afkHandler = injector.getInstance(AFKHandler.class);
 
+        checkForMisconfiguration();
+
         Command.init();
 
         Caption.loadDefaultLanguages();
@@ -50,6 +52,22 @@ public class BungeeAFK {
         Caption.saveToFile();
         PluginConfig.handleShutdown();
         afkHandler.shutdown();
+    }
+
+    private static void checkForMisconfiguration() {
+        String misconfiguredMessage = "";
+        if (afkHandler.getWarnDelayMillis() > afkHandler.getAfkDelayMillis()) {
+            misconfiguredMessage = "Warn delay is greater than AFK delay. This may cause unexpected behavior.";
+        }
+        if (afkHandler.getWarnDelayMillis() > afkHandler.getActionDelayMillis()) {
+            misconfiguredMessage = "Warn delay is greater than action delay. This may cause unexpected behavior.";
+        }
+        if (afkHandler.getAfkDelayMillis() > afkHandler.getActionDelayMillis()) {
+            misconfiguredMessage = "AFK delay is greater than action delay. This may cause unexpected behavior.";
+        }
+        if (!misconfiguredMessage.isEmpty()) {
+            LOGGER.warn("Misconfiguration detected: {}", misconfiguredMessage);
+        }
     }
 
     public static AFKHandler getAFKHandler() {
