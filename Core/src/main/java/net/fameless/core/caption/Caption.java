@@ -44,10 +44,10 @@ public final class Caption {
 
     public static void loadLanguage(Language language, JsonObject jsonObject) {
         languageJsonObjectHashMap.put(language, jsonObject);
-        LOGGER.info("Successfully loaded language: {}", language.getIdentifier());
     }
 
     public static void loadDefaultLanguages() {
+        LOGGER.info("Loading default languages...");
         for (Language language : Language.values()) {
             File langFile = PluginPaths.getLangFile(language);
 

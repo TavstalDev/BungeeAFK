@@ -11,6 +11,8 @@ import net.fameless.core.BungeeAFK;
 import net.fameless.core.BungeeAFKPlatform;
 import net.kyori.adventure.text.Component;
 import org.bstats.velocity.Metrics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
@@ -24,6 +26,7 @@ import java.nio.file.Path;
 )
 public class VelocityPlatform implements BungeeAFKPlatform {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + VelocityPlatform.class.getSimpleName());
     private static VelocityPlatform instance;
 
     private final ProxyServer proxyServer;
@@ -44,6 +47,7 @@ public class VelocityPlatform implements BungeeAFKPlatform {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
+        long startTime = System.currentTimeMillis();
         instance = this;
 
         VelocityCommandHandler commandHandler = new VelocityCommandHandler();
@@ -53,6 +57,8 @@ public class VelocityPlatform implements BungeeAFKPlatform {
         BungeeAFK.initCore(new VelocityModule());
 
         metricsFactory.make(this, 25577);
+        long duration = System.currentTimeMillis() - startTime;
+        LOGGER.info("Successfully enabled. (took {}ms)", duration);
     }
 
     public static Path getDataDirectory() {

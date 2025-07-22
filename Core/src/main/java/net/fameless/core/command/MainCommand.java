@@ -57,7 +57,7 @@ public class MainCommand extends Command {
                             TagResolver.resolver("allow", Tag.inserting(Component.text(allowBypass)))
                     ));
                 }
-                case "warn-delay" -> {
+                case "warning-delay" -> {
                     if (args.length < 3) {
                         sendUsage(caller);
                         return;
@@ -210,7 +210,7 @@ public class MainCommand extends Command {
                         "action-delay",
                         "action",
                         "caption",
-                        "warn-delay",
+                        "warning-delay",
                         "allow-bypass",
                         "reloadconfig"
                 ));
@@ -228,7 +228,7 @@ public class MainCommand extends Command {
                     }
                 } else if (args[1].equalsIgnoreCase("afk-delay")
                         || args[1].equalsIgnoreCase("action-delay")
-                        || args[1].equalsIgnoreCase("warn-delay")) {
+                        || args[1].equalsIgnoreCase("warning-delay")) {
                     completions.add("<seconds>");
                 } else if (args[1].equalsIgnoreCase("caption")) {
                     for (Language language : Language.values()) {

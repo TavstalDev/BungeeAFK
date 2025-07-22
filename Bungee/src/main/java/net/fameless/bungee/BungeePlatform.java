@@ -11,6 +11,8 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 import org.bstats.bungeecord.Metrics;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,6 +21,7 @@ import java.io.InputStream;
 
 public final class BungeePlatform extends Plugin implements BungeeAFKPlatform {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + BungeePlatform.class.getSimpleName());
     private static BungeePlatform instance;
     private static ProxyServer proxyServer;
 
@@ -34,6 +37,7 @@ public final class BungeePlatform extends Plugin implements BungeeAFKPlatform {
 
     @Override
     public void onEnable() {
+        long startTime = System.currentTimeMillis();
         instance = this;
         proxyServer = getProxy();
 
@@ -52,6 +56,8 @@ public final class BungeePlatform extends Plugin implements BungeeAFKPlatform {
         proxyServer.registerChannel("bungee:bungeeafk");
 
         new Metrics(this, 25576);
+        long duration = System.currentTimeMillis() - startTime;
+        LOGGER.info("Successfully enabled. (took {}ms)", duration);
     }
 
     @Override

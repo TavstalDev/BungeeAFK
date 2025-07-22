@@ -7,9 +7,12 @@ import net.kyori.adventure.text.Component;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class SpigotPlatform extends JavaPlugin implements BungeeAFKPlatform {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + SpigotPlatform.class.getSimpleName());
     private static SpigotPlatform instance;
 
     public static SpigotPlatform get() {
@@ -18,6 +21,7 @@ public final class SpigotPlatform extends JavaPlugin implements BungeeAFKPlatfor
 
     @Override
     public void onEnable() {
+        long startTime = System.currentTimeMillis();
         instance = this;
 
         Action.setActionExcluded(Action.CONNECT, true);
@@ -31,6 +35,8 @@ public final class SpigotPlatform extends JavaPlugin implements BungeeAFKPlatfor
         getCommand("afk").setTabCompleter(commandHandler);
 
         new Metrics(this, 25575);
+        long duration = System.currentTimeMillis() - startTime;
+        LOGGER.info("Successfully enabled. (took {}ms)", duration);
     }
 
     @Override

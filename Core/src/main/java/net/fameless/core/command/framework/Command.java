@@ -63,6 +63,7 @@ public abstract class Command {
     }
 
     public static void init() {
+        LOGGER.info("Initializing commands...");
         new MainCommand();
         new AFK();
     }

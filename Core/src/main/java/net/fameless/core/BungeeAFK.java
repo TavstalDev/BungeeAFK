@@ -9,6 +9,7 @@ import net.fameless.core.caption.Language;
 import net.fameless.core.command.framework.Command;
 import net.fameless.core.config.PluginConfig;
 import net.fameless.core.handling.AFKHandler;
+import net.fameless.core.handling.Action;
 import net.fameless.core.util.PluginUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ public class BungeeAFK {
         if (initialized) {
             throw new RuntimeException("You may not initialize another instance of BungeeAFK Core.");
         }
+        LOGGER.info("Initializing Core...");
 
         Injector injector = Guice.createInjector(
                 Stage.PRODUCTION,
@@ -38,13 +40,16 @@ public class BungeeAFK {
 
         checkForMisconfiguration();
 
+        if (!Action.isAfkServerConfigured()) {
+            LOGGER.warn("AFK server is not configured. This may cause players to be kicked instead of moved to an AFK server. Ignore if 'connect' action is not used.");
+        }
+
         Command.init();
 
         Caption.loadDefaultLanguages();
         Caption.setCurrentLanguage(Language.ofIdentifier(PluginConfig.get().getString("lang", "en")));
 
         initialized = true;
-        LOGGER.info("BungeeAFK Core initialized successfully.");
     }
 
     public static void handleShutdown() {
@@ -57,16 +62,20 @@ public class BungeeAFK {
     private static void checkForMisconfiguration() {
         String misconfiguredMessage = "";
         if (afkHandler.getWarnDelayMillis() > afkHandler.getAfkDelayMillis()) {
-            misconfiguredMessage = "Warn delay is greater than AFK delay. This may cause unexpected behavior.";
+            misconfiguredMessage += "'Warn delay is greater than AFK delay'";
         }
         if (afkHandler.getWarnDelayMillis() > afkHandler.getActionDelayMillis()) {
-            misconfiguredMessage = "Warn delay is greater than action delay. This may cause unexpected behavior.";
+            misconfiguredMessage += "'Warn delay is greater than action delay'";
         }
         if (afkHandler.getAfkDelayMillis() > afkHandler.getActionDelayMillis()) {
-            misconfiguredMessage = "AFK delay is greater than action delay. This may cause unexpected behavior.";
+            misconfiguredMessage += "'AFK delay is greater than action delay'";
         }
         if (!misconfiguredMessage.isEmpty()) {
-            LOGGER.warn("Misconfiguration detected: {}", misconfiguredMessage);
+            LOGGER.warn("Misconfiguration detected: {} - This may cause unexpected behavior. Falling back to default configuration.", misconfiguredMessage);
+            PluginConfig.get().set("warning-delay", 90);
+            PluginConfig.get().set("afk-delay", 180);
+            PluginConfig.get().set("action-delay", 420);
+            afkHandler.updateConfigValues();
         }
     }
 

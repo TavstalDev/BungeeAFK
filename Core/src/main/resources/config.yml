@@ -1,16 +1,16 @@
 lang: en
 
 # Delay after which the warning message is sent to the player (seconds) | Lang entry: "notification.afk_warning"
-# e.g., if set to 300, the player will receive a warning message after 5 minutes of inactivity
-warning-delay: 300
+# e.g., if set to 90, the player will receive a warning message after 1 minute and 30 seconds of inactivity
+warning-delay: 90
 
 # Delay after which a player is marked as AFK (seconds)
-# e.g., if set to 600, the player will be marked as AFK after 10 minutes of inactivity
-afk-delay: 600
+# e.g., if set to 180, the player will be marked as AFK after 3 minutes of inactivity
+afk-delay: 180
 
 # Delay after which a player marked as AFK is connected to the AFK server (seconds)
-# e.g., if set to 630, the player will be connected to the AFK server or kicked after 10 minutes and 30 seconds of inactivity
-action-delay: 630
+# e.g., if set to 420, the player will be connected to the AFK server or kicked after 7 minutes of inactivity
+action-delay: 420
 
 # Action to be performed after action delay is reached. Possible values: "kick", "connect", "nothing".
 # "kick" - player is kicked from the server

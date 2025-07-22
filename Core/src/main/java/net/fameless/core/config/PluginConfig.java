@@ -22,6 +22,7 @@ public class PluginConfig {
 
     @SuppressWarnings("unchecked")
     public static void init() {
+        LOGGER.info("Loading configuration...");
         File configFile = PluginPaths.getConfigFile();
 
         if (!configFile.exists()) {
@@ -43,7 +44,7 @@ public class PluginConfig {
 
         config = new YamlConfig((Map<String, Object>) load.loadFromString(yamlContent));
 
-        LOGGER.info("\nYour BungeeAFK configuration: \n  * lang: {} \n  * warn-delay: {} \n  * afk-delay: {} \n  * action-delay: {} \n  * action: {} \n  * afk-server-name: {} \n  * allow-bypass: {}",
+        LOGGER.info("\nYour BungeeAFK configuration: \n  * lang: {} \n  * warning-delay: {} \n  * afk-delay: {} \n  * action-delay: {} \n  * action: {} \n  * afk-server-name: {} \n  * allow-bypass: {}",
                 config.getString("lang", "en"),
                 config.getInt("warning-delay", 300),
                 config.getInt("afk-delay", 600),
