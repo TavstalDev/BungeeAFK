@@ -42,17 +42,36 @@ In the `config.yml`, you can customize:
 # Available languages: English (en) & German (de)
 lang: en
 
-# Time in seconds before a player is considered AFK
-afk-timeout: 300
+# Delay after which the warning message is sent to the player (seconds) | Lang entry: "notification.afk_warning"
+# e.g., if set to 300, the player will receive a warning message after 5 minutes of inactivity
+warning-delay: 300
 
-# Action to perform: "kick", "connect" or "nothing"
-action: "connect"
+# Delay after which a player is marked as AFK (seconds)
+# e.g., if set to 600, the player will be marked as AFK after 10 minutes of inactivity
+afk-delay: 600
 
-# (Only used for connect) The target server name as defined in your Bungee config
-afk-server: "afk"
+# Delay after which a player marked as AFK is connected to the AFK server (seconds)
+# e.g., if set to 630, the player will be connected to the AFK server or kicked after 10 minutes and 30 seconds of inactivity
+action-delay: 630
+
+# Action to be performed after action delay is reached. Possible values: "kick", "connect", "nothing".
+# "kick" - player is kicked from the server
+# "connect" - player is connected to the server specified in the "afk-server-name" option
+# "nothing" - nothing happens
+action: "kick"
+
+# Server name to which the player is connected when the action is set to "connect"
+# !!! Only available for BungeeCord and Velocity !!!
+afk-server-name: "afk"
+
+# Whether to allow bypass of AFK detection for players with the "afk.bypass" permission
+allow-bypass: true
 ```
 
 Make sure the AFK server (`afk`) exists in your BungeeCord/Velocity `config.yml`!
+
+- You can also Customize the Messages: [Customize Messages and Captions](https://github.com/Fameless9/BungeeAFK/wiki/Custom-Messages)
+- More about custumizing the plugin: [How to Configure](https://github.com/Fameless9/BungeeAFK/wiki/How-to-Configure)
 
 ---
 
@@ -79,8 +98,8 @@ Make sure the AFK server (`afk`) exists in your BungeeCord/Velocity `config.yml`
 ## 📣 Commands
 You can configure the plugin using the `/bungeeafk` or `/bafk` command.
 
-- `/bafk configure <action | action-delay | afk-delay> <param>`
-- `/bafk lang <en | de>`
+- `/bafk configure <action | action-delay | afk-delay | allow-bypass | warn-delay | caption | reloadconfig> <value>`
+- `/bafk lang <en | de | reload>`
 
 ---
 
