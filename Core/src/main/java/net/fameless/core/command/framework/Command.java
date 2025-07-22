@@ -1,6 +1,7 @@
 package net.fameless.core.command.framework;
 
 import net.fameless.core.caption.Caption;
+import net.fameless.core.command.AFK;
 import net.fameless.core.command.MainCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.Tag;
@@ -63,6 +64,7 @@ public abstract class Command {
 
     public static void init() {
         new MainCommand();
+        new AFK();
     }
 
     public String getPermission() {

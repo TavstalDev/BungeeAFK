@@ -30,23 +30,21 @@ public class BungeeAFKHandler extends AFKHandler implements Listener {
     protected void handleAction(@NotNull BAFKPlayer<?> bafkPlayer) {
         if (!(bafkPlayer instanceof BungeePlayer bungeePlayer)) return;
 
-        long timeSinceLastAction = bungeePlayer.getTimeSinceLastAction();
-
-        Optional<ProxiedPlayer> platformPlayerOptional = bungeePlayer.getPlatformPlayer();
-        if (platformPlayerOptional.isEmpty()) return;
-        ProxiedPlayer platformPlayer = platformPlayerOptional.get();
+        ProxiedPlayer platformPlayer = bungeePlayer.getPlatformPlayer().orElse(null);
+        if (platformPlayer == null) return;
 
         Server playerServer = platformPlayer.getServer();
         if (playerServer == null) return;
 
-        if (bungeePlayer.getAfkState() != AFKState.ACTION_TAKEN && playerServer.getInfo().getName().equalsIgnoreCase(PluginConfig.get().getString("afk-server-name", ""))) {
+        String afkServerName = PluginConfig.get().getString("afk-server-name", "");
+        if (bungeePlayer.getAfkState() != AFKState.ACTION_TAKEN && playerServer.getInfo().getName().equalsIgnoreCase(afkServerName)) {
             bungeePlayer.connect(playerLastServerMap.getOrDefault(bungeePlayer, "lobby"));
             return;
         }
 
         if (action.equals(Action.NOTHING)) return;
         if (bungeePlayer.getAfkState() != AFKState.AFK) return;
-        if (timeSinceLastAction < actionDelay) return;
+        if (bungeePlayer.getTimeSinceLastAction() < actionDelay) return;
 
         switch (action) {
             case CONNECT -> {
@@ -60,7 +58,7 @@ public class BungeeAFKHandler extends AFKHandler implements Listener {
                 }
 
                 playerLastServerMap.put(bungeePlayer, playerServer.getInfo().getName());
-                bungeePlayer.connect(PluginConfig.get().getString("afk-server-name"));
+                bungeePlayer.connect(afkServerName);
                 bungeePlayer.sendMessage(Caption.of("notification.afk_disconnect"));
                 LOGGER.info("Moved {} to AFK server.", bungeePlayer.getName());
             }
@@ -69,7 +67,6 @@ public class BungeeAFKHandler extends AFKHandler implements Listener {
                 LOGGER.info("Kicked {} for being AFK.", bungeePlayer.getName());
             }
         }
-        bungeePlayer.setAfkState(AFKState.ACTION_TAKEN);
     }
 
     @EventHandler
@@ -93,10 +90,6 @@ public class BungeeAFKHandler extends AFKHandler implements Listener {
         if (status.equals("action_caught")) {
             BungeePlayer bungeePlayer = BungeePlayer.adapt(playerUUID).orElse(null);
             if (bungeePlayer == null) return;
-
-            if (bungeePlayer.getAfkState() == AFKState.ACTION_TAKEN || bungeePlayer.getAfkState() == AFKState.AFK) {
-                bungeePlayer.sendMessage(Caption.of("notification.afk_return"));
-            }
             bungeePlayer.setTimeSinceLastAction(0);
             bungeePlayer.setAfkState(AFKState.ACTIVE);
         }

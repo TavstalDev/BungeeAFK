@@ -12,8 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -28,29 +26,41 @@ public abstract class AFKHandler {
     protected long afkDelay;
     protected long actionDelay;
 
-    protected final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    protected static final ScheduledExecutorService SCHEDULER =
+            Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "AFKHandler-Scheduler");
+                t.setDaemon(true);
+                return t;
+            });
     private ScheduledFuture<?> scheduledTask;
+
+    private final long UPDATE_PERIOD_MILLIS = 500L;
 
     public AFKHandler() {
         if (BungeeAFK.getAFKHandler() != null) throw new IllegalStateException("AFKHandler is already initialized.");
         updateConfigValues();
 
         // try-catch block to handle exceptions that would otherwise silently halt the task
-        this.scheduledTask = scheduler.scheduleAtFixedRate(() -> {
+        this.scheduledTask = SCHEDULER.scheduleAtFixedRate(() -> {
             try {
-                List<BAFKPlayer<?>> players = new ArrayList<>(BAFKPlayer.getOnlinePlayers());
-                for (BAFKPlayer<?> player : players) {
+                long start = System.nanoTime();
+                for (BAFKPlayer<?> player : BAFKPlayer.PLAYERS) {
+                    if (player.isOffline()) continue;
                     updateTimeSinceLastAction(player);
                     handleWarning(player);
                     handleAction(player);
                     handleAfkStatus(player);
                     sendActionBar(player);
+                    updatePlayerStatus(player);
                 }
+                long end = System.nanoTime();
+                long duration = TimeUnit.NANOSECONDS.toMicros(end - start);
+                LOGGER.info("task completed in {} ms", duration);
             } catch (Exception e) {
                 LOGGER.error("Error during AFK check task", e);
                 scheduledTask.cancel(false);
             }
-        }, 0, 500, TimeUnit.MILLISECONDS);
+        }, 0, UPDATE_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
 
         init();
     }
@@ -59,7 +69,7 @@ public abstract class AFKHandler {
         if (scheduledTask != null && !scheduledTask.isCancelled()) {
             scheduledTask.cancel(true);
         }
-        scheduler.shutdownNow();
+        SCHEDULER.shutdownNow();
         LOGGER.info("AFK handler successfully shutdown.");
     }
 
@@ -82,6 +92,25 @@ public abstract class AFKHandler {
     public void setAfkDelayMillis(long delay) {
         this.afkDelay = delay;
         PluginConfig.get().set("afk-delay", (int) (delay / 1000));
+    }
+
+    protected void updatePlayerStatus(@NotNull BAFKPlayer<?> player) {
+        if (player.getAfkState() == AFKState.BYPASS) {
+            player.setTimeSinceLastAction(0);
+            return;
+        }
+
+        long timeSinceLastAction = player.getTimeSinceLastAction();
+
+        if (timeSinceLastAction < warnDelay) {
+            player.setAfkState(AFKState.ACTIVE);
+        } else if (timeSinceLastAction < afkDelay) {
+            player.setAfkState(AFKState.WARNED);
+        } else if (timeSinceLastAction < actionDelay) {
+            player.setAfkState(AFKState.AFK);
+        } else {
+            player.setAfkState(AFKState.ACTION_TAKEN);
+        }
     }
 
     public void updateConfigValues() {
@@ -107,35 +136,25 @@ public abstract class AFKHandler {
     }
 
     protected void updateTimeSinceLastAction(@NotNull BAFKPlayer<?> player) {
-        long timeSinceLastAction = player.getTimeSinceLastAction();
-        if (timeSinceLastAction < 0) {
-            timeSinceLastAction = 0;
-        }
-        player.setTimeSinceLastAction(timeSinceLastAction + 500);
+        player.setTimeSinceLastAction(player.getTimeSinceLastAction() + UPDATE_PERIOD_MILLIS);
     }
 
     protected void handleWarning(@NotNull BAFKPlayer<?> player) {
         if (player.getAfkState() != AFKState.ACTIVE) return;
-        long timeSinceLastAction = player.getTimeSinceLastAction();
-        if (timeSinceLastAction >= warnDelay) {
-            player.sendMessage(Caption.of("notification.afk_warning"));
-            player.setAfkState(AFKState.WARNED);
-        }
+        if (player.getTimeSinceLastAction() < warnDelay) return;
+        player.sendMessage(Caption.of("notification.afk_warning"));
     }
 
     protected void handleAfkStatus(@NotNull BAFKPlayer<?> player) {
         if (player.getAfkState() != AFKState.WARNED) return;
-        long timeSinceLastAction = player.getTimeSinceLastAction();
+        if (player.getTimeSinceLastAction() < afkDelay) return;
 
-        if (timeSinceLastAction >= afkDelay) {
-            player.setAfkState(AFKState.AFK);
-            long timeUntilAction = Math.max(0, actionDelay - afkDelay);
-            player.sendMessage(Caption.of(
-                    action.getMessageKey(),
-                    TagResolver.resolver("action-delay", Tag.inserting(Component.text(Format.formatTime((int) (timeUntilAction / 1000)))))
-            ));
-            LOGGER.info("{} is now AFK.", player.getName());
-        }
+        long timeUntilAction = Math.max(0, actionDelay - afkDelay);
+        player.sendMessage(Caption.of(
+                action.getMessageKey(),
+                TagResolver.resolver("action-delay", Tag.inserting(Component.text(Format.formatTime((int) (timeUntilAction / 1000)))))
+        ));
+        LOGGER.info("{} is now AFK.", player.getName());
     }
 
     protected void sendActionBar(@NotNull BAFKPlayer<?> player) {

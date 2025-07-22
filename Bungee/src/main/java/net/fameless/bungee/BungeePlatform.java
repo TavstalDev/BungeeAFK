@@ -45,6 +45,7 @@ public final class BungeePlatform extends Plugin implements BungeeAFKPlatform {
         }
 
         getProxy().getPluginManager().registerCommand(this, new BungeeCommandHandler("bungeeafk", new String[]{"bafk"}));
+        getProxy().getPluginManager().registerCommand(this, new BungeeCommandHandler("afk", new String[]{}));
 
         BungeeAFK.initCore(new BungeeModule());
 

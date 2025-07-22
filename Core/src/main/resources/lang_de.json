@@ -28,6 +28,7 @@
   "command.config_reloaded": "<prefix><green>Konfiguration erfolgreich neu geladen.",
   "command.invalid_boolean": "<prefix><red>Bitte gib 'true' oder 'false' an.",
   "command.bypass_set": "<prefix><green>Bypass erlauben wurde auf <allow> gesetzt.",
+  "command.afk_bypass": "<prefix><gray>Du umgehst AFK-Checks und kannst deinen AFK-Status daher nicht ändern.",
   "error.no_caller_type": "<prefix><red>Falscher CallerType.",
   "actionbar.afk": "<blue>Du bist AFK"
 }

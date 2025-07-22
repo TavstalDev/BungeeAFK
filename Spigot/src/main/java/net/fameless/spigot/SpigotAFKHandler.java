@@ -23,23 +23,16 @@ public class SpigotAFKHandler extends AFKHandler implements Listener {
 
     @Override
     protected void handleAction(@NotNull BAFKPlayer<?> bafkPlayer) {
-        if (!(bafkPlayer instanceof SpigotPlayer spigotPlayer)) return;
-
-        if (spigotPlayer.getAfkState() != AFKState.AFK) return;
         if (!action.equals(Action.KICK)) return;
-
-        long timeSinceLastAction = spigotPlayer.getTimeSinceLastAction();
-        if (timeSinceLastAction < actionDelay) return;
+        if (!(bafkPlayer instanceof SpigotPlayer spigotPlayer)) return;
+        if (spigotPlayer.getAfkState() != AFKState.AFK) return;
+        if (spigotPlayer.getTimeSinceLastAction() < actionDelay) return;
 
         spigotPlayer.kick(Caption.of("notification.afk_kick"));
         LOGGER.info("Kicked {} for being AFK.", spigotPlayer.getName());
     }
 
     private void actionCaught(@NotNull SpigotPlayer spigotPlayer) {
-        if (spigotPlayer.getAfkState() == AFKState.ACTION_TAKEN || spigotPlayer.getAfkState() == AFKState.AFK) {
-            spigotPlayer.sendMessage(Caption.of("notification.afk_return"));
-        }
-
         spigotPlayer.setTimeSinceLastAction(0);
         spigotPlayer.setAfkState(AFKState.ACTIVE);
     }

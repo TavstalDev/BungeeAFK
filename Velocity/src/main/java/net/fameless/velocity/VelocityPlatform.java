@@ -46,7 +46,9 @@ public class VelocityPlatform implements BungeeAFKPlatform {
     public void onProxyInitialization(ProxyInitializeEvent event) {
         instance = this;
 
-        proxyServer.getCommandManager().register("bungeeafk", new VelocityCommandHandler(), "bafk");
+        VelocityCommandHandler commandHandler = new VelocityCommandHandler();
+        proxyServer.getCommandManager().register("bungeeafk", commandHandler, "bafk");
+        proxyServer.getCommandManager().register("afk", commandHandler);
 
         BungeeAFK.initCore(new VelocityModule());
 

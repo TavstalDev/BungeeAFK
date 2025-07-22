@@ -15,10 +15,11 @@ import net.fameless.core.player.BAFKPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class VelocityAFKHandler extends AFKHandler {
 
-    private final Map<BAFKPlayer<?>, String> playerLastServerMap = new HashMap<>();
+    private final Map<BAFKPlayer<?>, String> playerLastServerMap = new ConcurrentHashMap<>();
 
     @Override
     public void init() {
@@ -30,38 +31,33 @@ public class VelocityAFKHandler extends AFKHandler {
     protected void handleAction(@NotNull BAFKPlayer<?> bafkPlayer) {
         if (!(bafkPlayer instanceof VelocityPlayer velocityPlayer)) return;
 
-        long timeSinceLastAction = velocityPlayer.getTimeSinceLastAction();
+        Player platformPlayer = velocityPlayer.getPlatformPlayer().orElse(null);
+        if (platformPlayer == null) return;
 
-        Optional<Player> platformPlayerOptional = velocityPlayer.getPlatformPlayer();
-        if (platformPlayerOptional.isEmpty()) return;
-        Player platformPlayer = platformPlayerOptional.get();
+        ServerConnection playerServer = platformPlayer.getCurrentServer().orElse(null);
+        if (playerServer == null) return;
 
-        Optional<ServerConnection> playerServerOptional = platformPlayer.getCurrentServer();
-        if (playerServerOptional.isEmpty()) return;
-        ServerConnection playerServer = playerServerOptional.get();
-
-        if (velocityPlayer.getAfkState() != AFKState.ACTION_TAKEN && playerServer.getServerInfo().getName().equalsIgnoreCase(PluginConfig.get().getString("afk-server-name", ""))) {
+        String afkServerName = PluginConfig.get().getString("afk-server-name", "");
+        if (velocityPlayer.getAfkState() != AFKState.ACTION_TAKEN && playerServer.getServerInfo().getName().equalsIgnoreCase(afkServerName)) {
             velocityPlayer.connect(playerLastServerMap.getOrDefault(velocityPlayer, "lobby"));
             return;
         }
 
-        if (action.equals(Action.NOTHING)) return;
+        if (action == Action.NOTHING) return;
         if (velocityPlayer.getAfkState() != AFKState.AFK) return;
-        if (timeSinceLastAction < actionDelay) return;
+        if (velocityPlayer.getTimeSinceLastAction() < actionDelay) return;
 
         switch (action) {
             case CONNECT -> {
                 if (!Action.isAfkServerConfigured()) {
                     LOGGER.warn("AFK server not found. Defaulting to KICK.");
-
                     this.action = Action.KICK;
                     velocityPlayer.kick(Caption.of("notification.afk_kick"));
                     LOGGER.info("Kicked {} for being AFK.", velocityPlayer.getName());
                     return;
                 }
-
                 playerLastServerMap.put(velocityPlayer, playerServer.getServerInfo().getName());
-                velocityPlayer.connect(PluginConfig.get().getString("afk-server-name"));
+                velocityPlayer.connect(afkServerName);
                 velocityPlayer.sendMessage(Caption.of("notification.afk_disconnect"));
                 LOGGER.info("Moved {} to AFK server.", velocityPlayer.getName());
             }
@@ -70,7 +66,6 @@ public class VelocityAFKHandler extends AFKHandler {
                 LOGGER.info("Kicked {} for being AFK.", velocityPlayer.getName());
             }
         }
-        velocityPlayer.setAfkState(AFKState.ACTION_TAKEN);
     }
 
     @Subscribe
@@ -94,10 +89,6 @@ public class VelocityAFKHandler extends AFKHandler {
         if (status.equals("action_caught")) {
             VelocityPlayer velocityPlayer = VelocityPlayer.adapt(playerUUID).orElse(null);
             if (velocityPlayer == null) return;
-
-            if (velocityPlayer.getAfkState() == AFKState.ACTION_TAKEN || velocityPlayer.getAfkState() == AFKState.AFK) {
-                velocityPlayer.sendMessage(Caption.of("notification.afk_return"));
-            }
             velocityPlayer.setTimeSinceLastAction(0);
             velocityPlayer.setAfkState(AFKState.ACTIVE);
         }

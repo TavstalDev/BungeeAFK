@@ -27,7 +27,8 @@
   "command.warn_delay_set": "<prefix><green>Warning delay set to <delay>.",
   "command.config_reloaded": "<prefix><green>Configuration reloaded successfully.",
   "command.invalid_boolean": "<prefix><red>Please enter 'true' or 'false'.",
-    "command.bypass_set": "<prefix><green>Allow bypass set to <allow>.",
+  "command.bypass_set": "<prefix><green>Allow bypass set to <allow>.",
+  "command.afk_bypass": "<prefix><gray>You are currently bypassing AFK checks and cannot toggle AFK status.",
   "error.no_caller_type": "<prefix><red>Invalid CallerType.",
   "actionbar.afk": "<blue>You are AFK"
 }
