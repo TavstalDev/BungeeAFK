@@ -43,7 +43,6 @@ public abstract class AFKHandler {
         // try-catch block to handle exceptions that would otherwise silently halt the task
         this.scheduledTask = SCHEDULER.scheduleAtFixedRate(() -> {
             try {
-                long start = System.nanoTime();
                 for (BAFKPlayer<?> player : BAFKPlayer.PLAYERS) {
                     if (player.isOffline()) continue;
                     updateTimeSinceLastAction(player);
@@ -53,9 +52,6 @@ public abstract class AFKHandler {
                     sendActionBar(player);
                     updatePlayerStatus(player);
                 }
-                long end = System.nanoTime();
-                long duration = TimeUnit.NANOSECONDS.toMicros(end - start);
-                LOGGER.info("task completed in {} ms", duration);
             } catch (Exception e) {
                 LOGGER.error("Error during AFK check task", e);
                 scheduledTask.cancel(false);
