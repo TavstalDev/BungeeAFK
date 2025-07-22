@@ -32,6 +32,7 @@ public abstract class AFKHandler {
     private ScheduledFuture<?> scheduledTask;
 
     public AFKHandler() {
+        if (BungeeAFK.getAFKHandler() != null) throw new IllegalStateException("AFKHandler is already initialized.");
         updateConfigValues();
 
         // try-catch block to handle exceptions that would otherwise silently halt the task

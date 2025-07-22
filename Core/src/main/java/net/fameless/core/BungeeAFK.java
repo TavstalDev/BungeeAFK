@@ -18,7 +18,6 @@ public class BungeeAFK {
     private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + BungeeAFK.class.getSimpleName());
     private static boolean initialized = false;
     private static BungeeAFKPlatform platform;
-    private static Injector injector;
     private static AFKHandler afkHandler;
 
     public static synchronized void initCore(AbstractModule platformModule) {
@@ -26,7 +25,7 @@ public class BungeeAFK {
             throw new RuntimeException("You may not initialize another instance of BungeeAFK Core.");
         }
 
-        injector = Guice.createInjector(
+        Injector injector = Guice.createInjector(
                 Stage.PRODUCTION,
                 platformModule
         );
@@ -53,12 +52,11 @@ public class BungeeAFK {
         afkHandler.shutdown();
     }
 
-    public static Injector injector() {
-        return injector;
+    public static AFKHandler getAFKHandler() {
+        return afkHandler;
     }
 
     public static BungeeAFKPlatform platform() {
         return platform;
     }
-
 }

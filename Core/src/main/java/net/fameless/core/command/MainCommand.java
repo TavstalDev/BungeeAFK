@@ -37,7 +37,7 @@ public class MainCommand extends Command {
     protected void executeCommand(CommandCaller caller, String @NotNull [] args) {
         if (args.length < 2) return;
         if (args[0].equalsIgnoreCase("configure")) {
-            AFKHandler afkHandler = BungeeAFK.injector().getInstance(AFKHandler.class);
+            AFKHandler afkHandler = BungeeAFK.getAFKHandler();
             switch (args[1]) {
                 case "allow-bypass" -> {
                     if (args.length < 3) {
