@@ -39,7 +39,7 @@ public class YamlUtil {
         yamlContent.append("\n");
 
         yamlContent.append("# Whether to allow bypass of AFK detection for players with the \"afk.bypass\" permission\n");
-        yamlContent.append("allow-bypass: ").append(PluginConfig.get().getBoolean("bypass", true)).append("\n");
+        yamlContent.append("allow-bypass: ").append(PluginConfig.get().getBoolean("allow-bypass", true)).append("\n");
         return yamlContent.toString();
     }
 
