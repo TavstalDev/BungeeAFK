@@ -14,46 +14,11 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 public class SpigotAFKHandler extends AFKHandler implements Listener {
-
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private ScheduledFuture<?> scheduledTask;
 
     @Override
     public void init() {
-        updateConfigValues();
-
-        // try-catch block to handle exceptions that would otherwise silently cancel the task
-        scheduledTask = scheduler.scheduleAtFixedRate(() -> {
-            try {
-                for (BAFKPlayer<?> player : SpigotPlayer.getOnlinePlayers()) {
-                    if (!(player instanceof SpigotPlayer spigotPlayer)) continue;
-
-                    updateTimeSinceLastAction(spigotPlayer);
-                    handleWarning(spigotPlayer);
-                    handleAfkStatus(spigotPlayer);
-                    handleAction(spigotPlayer);
-                    sendActionBar(spigotPlayer);
-                }
-            } catch (Exception e) {
-                LOGGER.error("Error in AFK check task: ", e);
-                scheduledTask.cancel(false);
-            }
-        }, 0, 500, TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public void shutdown() {
-        if (scheduledTask != null && !scheduledTask.isCancelled()) {
-            scheduledTask.cancel(true);
-        }
-        scheduler.shutdownNow();
-        LOGGER.info("AFK handler successfully shutdown.");
+        Bukkit.getPluginManager().registerEvents(this, SpigotPlatform.get());
     }
 
     @Override
@@ -66,7 +31,7 @@ public class SpigotAFKHandler extends AFKHandler implements Listener {
         long timeSinceLastAction = spigotPlayer.getTimeSinceLastAction();
         if (timeSinceLastAction < actionDelay) return;
 
-        Bukkit.getScheduler().runTask(SpigotPlatform.get(), () -> spigotPlayer.kick(Caption.of("notification.afk_kick")));
+        spigotPlayer.kick(Caption.of("notification.afk_kick"));
         LOGGER.info("Kicked {} for being AFK.", spigotPlayer.getName());
     }
 

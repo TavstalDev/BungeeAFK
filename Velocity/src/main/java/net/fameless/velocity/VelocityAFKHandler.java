@@ -15,53 +15,15 @@ import net.fameless.core.player.BAFKPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 public class VelocityAFKHandler extends AFKHandler {
 
     private final Map<BAFKPlayer<?>, String> playerLastServerMap = new HashMap<>();
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private ScheduledFuture<?> scheduledTask;
-
     @Override
     public void init() {
-        updateConfigValues();
-
-        // try-catch block to handle exceptions that would otherwise silently cancel the task
-        this.scheduledTask = scheduler.scheduleAtFixedRate(() -> {
-            try {
-                List<BAFKPlayer<?>> players = new ArrayList<>(VelocityPlayer.getOnlinePlayers());
-
-                for (BAFKPlayer<?> player : players) {
-                    if (!(player instanceof VelocityPlayer velocityPlayer)) continue;
-
-                    updateTimeSinceLastAction(velocityPlayer);
-                    handleWarning(velocityPlayer);
-                    handleAction(velocityPlayer);
-                    handleAfkStatus(velocityPlayer);
-                    sendActionBar(velocityPlayer);
-                }
-            } catch (Exception e) {
-                LOGGER.error("Error during AFK check task", e);
-                scheduledTask.cancel(false);
-            }
-        }, 0, 500, TimeUnit.MILLISECONDS);
-
         VelocityPlatform.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.create("bungee", "bungeeafk"));
         VelocityPlatform.getProxy().getEventManager().register(VelocityPlatform.get(), this);
-    }
-
-    @Override
-    public void shutdown() {
-        if (scheduledTask != null && !scheduledTask.isCancelled()) {
-            scheduledTask.cancel(true);
-        }
-        scheduler.shutdownNow();
-        LOGGER.info("AFK handler successfully shutdown.");
     }
 
     @Override
@@ -93,7 +55,7 @@ public class VelocityAFKHandler extends AFKHandler {
                     LOGGER.warn("AFK server not found. Defaulting to KICK.");
 
                     this.action = Action.KICK;
-                    platformPlayer.disconnect(Caption.of("notification.afk_kick"));
+                    velocityPlayer.kick(Caption.of("notification.afk_kick"));
                     LOGGER.info("Kicked {} for being AFK.", velocityPlayer.getName());
                     return;
                 }
@@ -104,7 +66,7 @@ public class VelocityAFKHandler extends AFKHandler {
                 LOGGER.info("Moved {} to AFK server.", velocityPlayer.getName());
             }
             case KICK -> {
-                platformPlayer.disconnect(Caption.of("notification.afk_kick"));
+                velocityPlayer.kick(Caption.of("notification.afk_kick"));
                 LOGGER.info("Kicked {} for being AFK.", velocityPlayer.getName());
             }
         }

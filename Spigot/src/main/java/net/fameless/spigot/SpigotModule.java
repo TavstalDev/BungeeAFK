@@ -9,7 +9,7 @@ public class SpigotModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(BungeeAFKPlatform.class).toInstance(SpigotPlatform.get());
-        bind(AFKHandler.class).toInstance(new SpigotAFKHandler());
+        bind(AFKHandler.class).to(SpigotAFKHandler.class);
     }
 
 }

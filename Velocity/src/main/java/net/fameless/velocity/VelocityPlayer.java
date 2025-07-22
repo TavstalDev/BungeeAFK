@@ -2,6 +2,8 @@ package net.fameless.velocity;
 
 import com.velocitypowered.api.proxy.Player;
 import net.fameless.core.command.framework.CallerType;
+import net.fameless.core.event.EventDispatcher;
+import net.fameless.core.event.PlayerKickEvent;
 import net.fameless.core.player.BAFKPlayer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -94,8 +96,18 @@ public class VelocityPlayer extends BAFKPlayer<Player> {
 
     @Override
     public void kick(Component reason) {
-        Optional<Player> platformPlayer = getPlatformPlayer();
-        platformPlayer.ifPresent(player -> player.disconnect(reason));
+        Player player = getPlatformPlayer().orElse(null);
+        if (player == null) return;
+
+        PlayerKickEvent event = new PlayerKickEvent(this, reason);
+        EventDispatcher.post(event);
+
+        if (event.isCancelled()) {
+            LOGGER.info("PlayerKickEvent was cancelled for player: {}", getName());
+            return;
+        }
+
+        player.disconnect(event.getReason());
     }
 
     @Override

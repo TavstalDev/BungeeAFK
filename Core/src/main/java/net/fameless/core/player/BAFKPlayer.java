@@ -2,11 +2,15 @@ package net.fameless.core.player;
 
 import net.fameless.core.command.framework.CommandCaller;
 import net.fameless.core.config.PluginConfig;
+import net.fameless.core.event.EventDispatcher;
+import net.fameless.core.event.PlayerAFKStateChangeEvent;
 import net.fameless.core.handling.AFKState;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +19,7 @@ import java.util.UUID;
 
 public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
 
+    protected static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/Player");
     public static final List<BAFKPlayer<?>> PLAYERS = new ArrayList<>();
 
     protected String name;
@@ -76,7 +81,12 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
     }
 
     public void setAfkState(AFKState afkState) {
-        this.afkState = afkState;
+        if (this.afkState == afkState) return;
+
+        PlayerAFKStateChangeEvent event = new PlayerAFKStateChangeEvent(this, this.afkState, afkState);
+        EventDispatcher.post(event);
+
+        this.afkState = event.getNewState();
     }
 
     public void sendMessage(Component message) {

@@ -9,6 +9,6 @@ public class BungeeModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(BungeeAFKPlatform.class).toInstance(BungeePlatform.get());
-        bind(AFKHandler.class).toInstance(new BungeeAFKHandler());
+        bind(AFKHandler.class).to(BungeeAFKHandler.class);
     }
 }

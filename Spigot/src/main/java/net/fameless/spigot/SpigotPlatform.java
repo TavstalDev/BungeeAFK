@@ -30,8 +30,6 @@ public final class SpigotPlatform extends JavaPlugin implements BungeeAFKPlatfor
         getCommand("bungeeafk").setExecutor(commandHandler);
         getCommand("bungeeafk").setTabCompleter(commandHandler);
 
-        Bukkit.getPluginManager().registerEvents((Listener) BungeeAFK.injector().getInstance(AFKHandler.class), this);
-
         new Metrics(this, 25575);
     }
 

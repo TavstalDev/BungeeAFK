@@ -32,6 +32,9 @@ public abstract class AFKHandler {
     private ScheduledFuture<?> scheduledTask;
 
     public AFKHandler() {
+        updateConfigValues();
+
+        // try-catch block to handle exceptions that would otherwise silently halt the task
         this.scheduledTask = scheduler.scheduleAtFixedRate(() -> {
             try {
                 List<BAFKPlayer<?>> players = new ArrayList<>(BAFKPlayer.getOnlinePlayers());
@@ -47,6 +50,16 @@ public abstract class AFKHandler {
                 scheduledTask.cancel(false);
             }
         }, 0, 500, TimeUnit.MILLISECONDS);
+
+        init();
+    }
+
+    public void shutdown() {
+        if (scheduledTask != null && !scheduledTask.isCancelled()) {
+            scheduledTask.cancel(true);
+        }
+        scheduler.shutdownNow();
+        LOGGER.info("AFK handler successfully shutdown.");
     }
 
     public void setAction(@NotNull Action action) {
@@ -144,7 +157,5 @@ public abstract class AFKHandler {
 
     protected abstract void handleAction(@NotNull BAFKPlayer<?> player);
 
-    public abstract void init();
-
-    public abstract void shutdown();
+    protected abstract void init();
 }

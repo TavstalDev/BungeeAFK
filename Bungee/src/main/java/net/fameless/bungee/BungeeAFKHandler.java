@@ -6,7 +6,6 @@ import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.handling.AFKState;
 import net.fameless.core.handling.Action;
 import net.fameless.core.player.BAFKPlayer;
-import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.PluginMessageEvent;
@@ -25,42 +24,10 @@ public class BungeeAFKHandler extends AFKHandler implements Listener {
 
     private final Map<BAFKPlayer<?>, String> playerLastServerMap = new HashMap<>();
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private ScheduledFuture<?> scheduledTask;
-
     @Override
     public void init() {
-        updateConfigValues();
-
-        // try-catch block to handle exceptions that would otherwise silently cancel the task
-        scheduledTask = scheduler.scheduleAtFixedRate(() -> {
-            try {
-                for (BAFKPlayer<?> player : BungeePlayer.getOnlinePlayers()) {
-                    if (!(player instanceof BungeePlayer bungeePlayer)) continue;
-
-                    updateTimeSinceLastAction(bungeePlayer);
-                    handleWarning(bungeePlayer);
-                    handleAction(bungeePlayer);
-                    handleAfkStatus(bungeePlayer);
-                    sendActionBar(bungeePlayer);
-                }
-            } catch (Exception e) {
-                LOGGER.error("Error in AFK check task: ", e);
-                scheduledTask.cancel(false);
-            }
-        }, 0, 500, TimeUnit.MILLISECONDS);
-
         BungeePlatform.proxyServer().registerChannel("bungee:bungeeafk");
         BungeePlatform.proxyServer().getPluginManager().registerListener(BungeePlatform.get(), this);
-    }
-
-    @Override
-    public void shutdown() {
-        if (scheduledTask != null && !scheduledTask.isCancelled()) {
-            scheduledTask.cancel(true);
-        }
-        scheduler.shutdownNow();
-        LOGGER.info("AFK handler successfully shutdown.");
     }
 
     @Override
@@ -91,7 +58,7 @@ public class BungeeAFKHandler extends AFKHandler implements Listener {
                     LOGGER.warn("AFK server not found. Defaulting to KICK.");
 
                     this.action = Action.KICK;
-                    platformPlayer.disconnect(BungeeComponentSerializer.get().serialize(Caption.of("notification.afk_kick")));
+                    bungeePlayer.kick(Caption.of("notification.afk_kick"));
                     LOGGER.info("Kicked {} for being AFK.", bungeePlayer.getName());
                     return;
                 }
@@ -102,7 +69,7 @@ public class BungeeAFKHandler extends AFKHandler implements Listener {
                 LOGGER.info("Moved {} to AFK server.", bungeePlayer.getName());
             }
             case KICK -> {
-                platformPlayer.disconnect(BungeeComponentSerializer.get().serialize(Caption.of("notification.afk_kick")));
+                bungeePlayer.kick(Caption.of("notification.afk_kick"));
                 LOGGER.info("Kicked {} for being AFK.", bungeePlayer.getName());
             }
         }

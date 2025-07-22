@@ -36,7 +36,6 @@ public class BungeeAFK {
 
         platform = injector.getInstance(BungeeAFKPlatform.class);
         afkHandler = injector.getInstance(AFKHandler.class);
-        afkHandler.init();
 
         Command.init();
 

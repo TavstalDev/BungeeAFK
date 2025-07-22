@@ -1,6 +1,8 @@
 package net.fameless.bungee;
 
 import net.fameless.core.command.framework.CallerType;
+import net.fameless.core.event.EventDispatcher;
+import net.fameless.core.event.PlayerKickEvent;
 import net.fameless.core.player.BAFKPlayer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -104,8 +106,18 @@ public class BungeePlayer extends BAFKPlayer<ProxiedPlayer> {
 
     @Override
     public void kick(Component reason) {
-        Optional<ProxiedPlayer> platformPlayerOptional = getPlatformPlayer();
-        platformPlayerOptional.ifPresent(platformPlayer -> platformPlayer.disconnect(BungeeComponentSerializer.get().serialize(reason)));
+        ProxiedPlayer player = getPlatformPlayer().orElse(null);
+        if (player == null) return;
+
+        PlayerKickEvent event = new PlayerKickEvent(this, reason);
+        EventDispatcher.post(event);
+
+        if (event.isCancelled()) {
+            LOGGER.info("PlayerKickEvent was cancelled for player: {}", getName());
+            return;
+        }
+
+        player.disconnect(BungeeComponentSerializer.get().serialize(event.getReason()));
     }
 
     @Override
