@@ -10,3 +10,4 @@ website: https://github.com/Fameless9
 commands:
     bungeeafk:
         aliases: [bafk]
+    afk:
