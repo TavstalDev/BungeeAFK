@@ -5,6 +5,8 @@ import net.fameless.core.caption.Caption;
 import net.fameless.core.config.PluginConfig;
 import net.fameless.core.player.BAFKPlayer;
 import net.fameless.core.util.Format;
+import net.fameless.core.util.PlayerFilters;
+import net.fameless.core.util.PluginMessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -45,20 +47,20 @@ public abstract class AFKHandler {
 
     private void checkAFKPlayers() {
         try {
-            for (BAFKPlayer<?> player : BAFKPlayer.PLAYERS) {
-                if (player.isOffline()) continue;
-                AFKState afkState = player.getAfkState();
-                if (afkState == AFKState.BYPASS) continue;
-                player.increaseTimeSinceLastAction(UPDATE_PERIOD_MILLIS);
-                switch (afkState) {
-                    case ACTIVE -> handleWarning(player);
-                    case WARNED -> handleAfkStatus(player);
-                }
+            BAFKPlayer.PLAYERS.stream()
+                    .filter(PlayerFilters.isOnline())
+                    .forEach(player -> {
+                        AFKState afkState = player.getAfkState();
+                        player.increaseTimeSinceLastAction(UPDATE_PERIOD_MILLIS);
+                        switch (afkState) {
+                            case ACTIVE -> handleWarning(player);
+                            case WARNED -> handleAfkStatus(player);
+                        }
 
-                handleAction(player);
-                updatePlayerStatus(player);
-                sendActionBar(player);
-            }
+                        handleAction(player);
+                        updatePlayerStatus(player);
+                        sendActionBar(player);
+                    });
         } catch (Exception e) {
             LOGGER.error("Error during AFK check task", e);
             scheduledTask.cancel(false);
@@ -129,8 +131,11 @@ public abstract class AFKHandler {
                     action.getMessageKey(),
                     TagResolver.resolver("action-delay", Tag.inserting(Component.text(Format.formatTime((int) (timeUntilAction / 1000)))))
             ));
-            BungeeAFK.platform().broadcast(Caption.of("notification.afk_broadcast",
-                    TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))));
+            PluginMessage.broadcastMessageToFiltered(
+                    Caption.of("notification.afk_broadcast",
+                    TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
+                    PlayerFilters.matches(player).negate()
+            );
             LOGGER.info("{} is now AFK.", player.getName());
         }
     }
@@ -153,8 +158,11 @@ public abstract class AFKHandler {
                     LOGGER.warn("AFK server not found. Defaulting to KICK.");
                     this.action = Action.KICK;
                     player.kick(Caption.of("notification.afk_kick"));
-                    BungeeAFK.platform().broadcast(Caption.of("notification.afk_kick_broadcast",
-                            TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))));
+                    PluginMessage.broadcastMessageToFiltered(
+                            Caption.of("notification.afk_kick_broadcast",
+                            TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
+                            PlayerFilters.matches(player).negate()
+                    );
                     LOGGER.info("Kicked {} for being AFK.", player.getName());
                     return;
                 }
@@ -162,14 +170,18 @@ public abstract class AFKHandler {
                 playerLastServerMap.put(player, currentServerName);
                 player.connect(afkServerName);
                 player.sendMessage(Caption.of("notification.afk_disconnect"));
-                BungeeAFK.platform().broadcast(Caption.of("notification.afk_disconnect_broadcast",
-                        TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))));
+                PluginMessage.broadcastMessageToFiltered(
+                        Caption.of("notification.afk_disconnect_broadcast",
+                        TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
+                        PlayerFilters.matches(player).negate()
+                );
                 LOGGER.info("Moved {} to AFK server.", player.getName());
             }
             case KICK -> {
                 player.kick(Caption.of("notification.afk_kick"));
-                BungeeAFK.platform().broadcast(Caption.of("notification.afk_kick_broadcast",
-                        TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))));
+                PluginMessage.broadcastMessageToFiltered(
+                        Caption.of("notification.afk_kick_broadcast",
+                                TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))));
                 LOGGER.info("Kicked {} for being AFK.", player.getName());
             }
         }

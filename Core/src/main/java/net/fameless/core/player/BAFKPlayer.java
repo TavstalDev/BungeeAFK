@@ -1,12 +1,13 @@
 package net.fameless.core.player;
 
-import net.fameless.core.BungeeAFK;
 import net.fameless.core.caption.Caption;
 import net.fameless.core.command.framework.CommandCaller;
 import net.fameless.core.config.PluginConfig;
 import net.fameless.core.event.EventDispatcher;
 import net.fameless.core.event.PlayerAFKStateChangeEvent;
 import net.fameless.core.handling.AFKState;
+import net.fameless.core.util.PlayerFilters;
+import net.fameless.core.util.PluginMessage;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -65,6 +66,7 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
     }
 
     public void increaseTimeSinceLastAction(long increment) {
+        if (afkState == AFKState.BYPASS) return;
         this.timeSinceLastAction += increment;
     }
 
@@ -83,8 +85,11 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
 
         if ((this.afkState == AFKState.AFK || this.afkState == AFKState.ACTION_TAKEN) && event.getNewState() == AFKState.ACTIVE) {
             sendMessage(Caption.of("notification.afk_return"));
-            BungeeAFK.platform().broadcast(Caption.of("notification.afk_return_broadcast",
-                    TagResolver.resolver("player", Tag.inserting(Component.text(getName())))));
+            PluginMessage.broadcastMessageToFiltered(
+                    Caption.of("notification.afk_return_broadcast",
+                    TagResolver.resolver("player", Tag.inserting(Component.text(getName())))),
+                    PlayerFilters.matches(this).negate()
+            );
         }
         this.afkState = event.getNewState();
     }
