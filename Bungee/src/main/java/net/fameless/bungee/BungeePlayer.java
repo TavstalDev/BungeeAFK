@@ -8,6 +8,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.connection.Server;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -124,5 +125,15 @@ public class BungeePlayer extends BAFKPlayer<ProxiedPlayer> {
     public boolean hasPermission(@NotNull String permission) {
         Optional<ProxiedPlayer> platformPlayerOptional = getPlatformPlayer();
         return platformPlayerOptional.isPresent() && platformPlayerOptional.get().hasPermission(permission);
+    }
+
+    @Override
+    public String getCurrentServerName() {
+        ProxiedPlayer player = getPlatformPlayer().orElse(null);
+        if (player == null) {
+            return "N/A";
+        }
+        Server playerServer = player.getServer();
+        return playerServer != null ? playerServer.getInfo().getName() : "N/A";
     }
 }

@@ -96,22 +96,29 @@ public class SpigotPlayer extends BAFKPlayer<Player> {
 
     @Override
     public void kick(Component reason) {
-        Player player = getPlatformPlayer().orElse(null);
-        if (player == null) return;
+        Bukkit.getScheduler().runTask(SpigotPlatform.get(), () -> {
+            Player player = getPlatformPlayer().orElse(null);
+            if (player == null) return;
 
-        PlayerKickEvent event = new PlayerKickEvent(this, reason);
-        EventDispatcher.post(event);
+            PlayerKickEvent event = new PlayerKickEvent(this, reason);
+            EventDispatcher.post(event);
 
-        if (event.isCancelled()) {
-            LOGGER.info("PlayerKickEvent was cancelled for player: {}", getName());
-            return;
-        }
+            if (event.isCancelled()) {
+                LOGGER.info("PlayerKickEvent was cancelled for player: {}", getName());
+                return;
+            }
 
-        player.kickPlayer(LegacyComponentSerializer.legacySection().serialize(reason));
+            player.kickPlayer(LegacyComponentSerializer.legacySection().serialize(event.getReason()));
+        });
     }
 
     @Override
     public boolean hasPermission(String permission) {
         return getPlatformPlayer().isPresent() && getPlatformPlayer().get().hasPermission(permission);
+    }
+
+    @Override
+    public String getCurrentServerName() {
+        return ""; // Not needed for SpigotPlatform
     }
 }

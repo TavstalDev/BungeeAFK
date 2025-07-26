@@ -1,13 +1,7 @@
 package net.fameless.bungee;
 
-import net.fameless.core.caption.Caption;
-import net.fameless.core.config.PluginConfig;
 import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.handling.AFKState;
-import net.fameless.core.handling.Action;
-import net.fameless.core.player.BAFKPlayer;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -18,55 +12,10 @@ import java.util.*;
 
 public class BungeeAFKHandler extends AFKHandler implements Listener {
 
-    private final Map<BAFKPlayer<?>, String> playerLastServerMap = new HashMap<>();
-
     @Override
     public void init() {
         BungeePlatform.proxyServer().registerChannel("bungee:bungeeafk");
         BungeePlatform.proxyServer().getPluginManager().registerListener(BungeePlatform.get(), this);
-    }
-
-    @Override
-    protected void handleAction(@NotNull BAFKPlayer<?> bafkPlayer) {
-        if (!(bafkPlayer instanceof BungeePlayer bungeePlayer)) return;
-
-        ProxiedPlayer platformPlayer = bungeePlayer.getPlatformPlayer().orElse(null);
-        if (platformPlayer == null) return;
-
-        Server playerServer = platformPlayer.getServer();
-        if (playerServer == null) return;
-
-        String afkServerName = PluginConfig.get().getString("afk-server-name", "");
-        if (bungeePlayer.getAfkState() != AFKState.ACTION_TAKEN && playerServer.getInfo().getName().equalsIgnoreCase(afkServerName)) {
-            bungeePlayer.connect(playerLastServerMap.getOrDefault(bungeePlayer, "lobby"));
-            return;
-        }
-
-        if (action.equals(Action.NOTHING)) return;
-        if (bungeePlayer.getAfkState() != AFKState.AFK) return;
-        if (bungeePlayer.getTimeSinceLastAction() < actionDelay) return;
-
-        switch (action) {
-            case CONNECT -> {
-                if (!Action.isAfkServerConfigured()) {
-                    LOGGER.warn("AFK server not found. Defaulting to KICK.");
-
-                    this.action = Action.KICK;
-                    bungeePlayer.kick(Caption.of("notification.afk_kick"));
-                    LOGGER.info("Kicked {} for being AFK.", bungeePlayer.getName());
-                    return;
-                }
-
-                playerLastServerMap.put(bungeePlayer, playerServer.getInfo().getName());
-                bungeePlayer.connect(afkServerName);
-                bungeePlayer.sendMessage(Caption.of("notification.afk_disconnect"));
-                LOGGER.info("Moved {} to AFK server.", bungeePlayer.getName());
-            }
-            case KICK -> {
-                bungeePlayer.kick(Caption.of("notification.afk_kick"));
-                LOGGER.info("Kicked {} for being AFK.", bungeePlayer.getName());
-            }
-        }
     }
 
     @EventHandler

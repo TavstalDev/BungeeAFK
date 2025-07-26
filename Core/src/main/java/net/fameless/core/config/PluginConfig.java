@@ -54,14 +54,14 @@ public class PluginConfig {
                 config.getBoolean("allow-bypass", true));
     }
 
-    public static void handleReload() {
+    public static void reload() {
         init();
     }
 
-    public static void handleShutdown() {
+    public static void shutdown() {
         File configFile = PluginPaths.getConfigFile();
 
-        String fileContent = YamlUtil.generateYamlFile();
+        String fileContent = YamlUtil.generateConfig();
         try (FileWriter writer = new FileWriter(configFile)) {
             writer.write(fileContent);
             writer.flush();

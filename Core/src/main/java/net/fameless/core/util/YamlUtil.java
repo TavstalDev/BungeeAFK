@@ -2,10 +2,11 @@ package net.fameless.core.util;
 
 import net.fameless.core.caption.Caption;
 import net.fameless.core.config.PluginConfig;
+import org.jetbrains.annotations.NotNull;
 
 public class YamlUtil {
 
-    public static String generateYamlFile() {
+    public static @NotNull String generateConfig() {
         StringBuilder yamlContent = new StringBuilder();
         yamlContent.append("lang: ").append(Caption.getCurrentLanguage().getIdentifier()).append("\n");
         yamlContent.append("\n");

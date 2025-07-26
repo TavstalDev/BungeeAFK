@@ -61,6 +61,10 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
         this.timeSinceLastAction = timeSinceLastAction;
     }
 
+    public void increaseTimeSinceLastAction(long increment) {
+        this.timeSinceLastAction += increment;
+    }
+
     public AFKState getAfkState() {
         if (PluginConfig.get().getBoolean("allow-bypass") && hasPermission("bungeeafk.bypass")) {
             return AFKState.BYPASS;
@@ -105,4 +109,6 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
     public abstract void kick(Component reason);
 
     public abstract boolean hasPermission(String permission);
+
+    public abstract String getCurrentServerName();
 }

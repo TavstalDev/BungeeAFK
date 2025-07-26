@@ -115,4 +115,13 @@ public class VelocityPlayer extends BAFKPlayer<Player> {
         Optional<Player> platformPlayer = getPlatformPlayer();
         return platformPlayer.isPresent() && platformPlayer.get().hasPermission(permission);
     }
+
+    @Override
+    public @NotNull String getCurrentServerName() {
+        Player player = getPlatformPlayer().orElse(null);
+        if (player == null) return "N/A";
+        return player.getCurrentServer()
+                .map(serverConnection -> serverConnection.getServerInfo().getName())
+                .orElse("N/A");
+    }
 }

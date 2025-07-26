@@ -55,7 +55,7 @@ public class BungeeAFK {
     public static void handleShutdown() {
         if (!initialized) return;
         Caption.saveToFile();
-        PluginConfig.handleShutdown();
+        PluginConfig.shutdown();
         afkHandler.shutdown();
     }
 
@@ -75,7 +75,7 @@ public class BungeeAFK {
             PluginConfig.get().set("warning-delay", 90);
             PluginConfig.get().set("afk-delay", 180);
             PluginConfig.get().set("action-delay", 420);
-            afkHandler.updateConfigValues();
+            afkHandler.fetchConfigValues();
         }
     }
 

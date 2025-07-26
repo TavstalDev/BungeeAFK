@@ -172,8 +172,8 @@ public class MainCommand extends Command {
                     ));
                 }
                 case "reloadconfig" -> {
-                    PluginConfig.handleReload();
-                    afkHandler.updateConfigValues();
+                    PluginConfig.reload();
+                    afkHandler.fetchConfigValues();
                     caller.sendMessage(Caption.of("command.config_reloaded"));
                 }
             }
