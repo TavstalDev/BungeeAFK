@@ -129,6 +129,8 @@ public abstract class AFKHandler {
                     action.getMessageKey(),
                     TagResolver.resolver("action-delay", Tag.inserting(Component.text(Format.formatTime((int) (timeUntilAction / 1000)))))
             ));
+            BungeeAFK.platform().broadcast(Caption.of("notification.afk_broadcast",
+                    TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))));
             LOGGER.info("{} is now AFK.", player.getName());
         }
     }
@@ -151,6 +153,8 @@ public abstract class AFKHandler {
                     LOGGER.warn("AFK server not found. Defaulting to KICK.");
                     this.action = Action.KICK;
                     player.kick(Caption.of("notification.afk_kick"));
+                    BungeeAFK.platform().broadcast(Caption.of("notification.afk_kick_broadcast",
+                            TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))));
                     LOGGER.info("Kicked {} for being AFK.", player.getName());
                     return;
                 }
@@ -158,10 +162,14 @@ public abstract class AFKHandler {
                 playerLastServerMap.put(player, currentServerName);
                 player.connect(afkServerName);
                 player.sendMessage(Caption.of("notification.afk_disconnect"));
+                BungeeAFK.platform().broadcast(Caption.of("notification.afk_disconnect_broadcast",
+                        TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))));
                 LOGGER.info("Moved {} to AFK server.", player.getName());
             }
             case KICK -> {
                 player.kick(Caption.of("notification.afk_kick"));
+                BungeeAFK.platform().broadcast(Caption.of("notification.afk_kick_broadcast",
+                        TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))));
                 LOGGER.info("Kicked {} for being AFK.", player.getName());
             }
         }
