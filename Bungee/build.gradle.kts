@@ -20,7 +20,7 @@ dependencies {
 }
 
 group = "net.fameless"
-version = "2.0.0"
+version = "2.1.0"
 description = "BungeeAFK for BungeeCord proxies"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
@@ -32,7 +32,7 @@ tasks {
     shadowJar {
         archiveBaseName.set("BungeeAFK-Bungee")
         archiveClassifier.set("")
-        archiveVersion.set("2.0.0")
+        archiveVersion.set("2.1.0")
 
         relocate("org.bstats", "net.fameless.bungeeafk.bstats")
     }
