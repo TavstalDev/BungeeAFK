@@ -5,16 +5,12 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
-import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.fameless.core.BungeeAFK;
 import net.fameless.core.BungeeAFKPlatform;
-import net.kyori.adventure.text.Component;
 import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.file.Path;
 
 @Plugin(
     id = "bungeeafk",
@@ -30,13 +26,11 @@ public class VelocityPlatform implements BungeeAFKPlatform {
     private static VelocityPlatform instance;
 
     private final ProxyServer proxyServer;
-    private final Path dataDirectory;
     private final Metrics.Factory metricsFactory;
 
     @Inject
-    public VelocityPlatform(ProxyServer proxyServer, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
+    public VelocityPlatform(ProxyServer proxyServer, Metrics.Factory metricsFactory) {
         this.proxyServer = proxyServer;
-        this.dataDirectory = dataDirectory;
         this.metricsFactory = metricsFactory;
     }
 
@@ -61,26 +55,12 @@ public class VelocityPlatform implements BungeeAFKPlatform {
         LOGGER.info("Successfully enabled. (took {}ms)", duration);
     }
 
-    public static Path getDataDirectory() {
-        return instance.dataDirectory;
-    }
-
     public static ProxyServer getProxy() {
         return instance.proxyServer;
     }
 
     public static VelocityPlatform get() {
         return instance;
-    }
-
-    @Override
-    public void shutDown(String message) {
-        proxyServer.shutdown(Component.text(message));
-    }
-
-    @Override
-    public void broadcast(Component message) {
-        proxyServer.sendMessage(message);
     }
 
     @Override

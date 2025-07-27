@@ -21,7 +21,7 @@ public final class Format {
      * @param time The time in seconds to convert.
      * @return A string in the format "xd yh zm ws" representing the given time.
      */
-    public static String formatTime(int time) {
+    public static @NotNull String formatTime(int time) {
         int days = time / 86400;
         int hours = time / 3600 % 24;
         int minutes = time / 60 % 60;
@@ -75,7 +75,7 @@ public final class Format {
      * @param input The string to be split.
      * @return An unmodifiable list of substrings obtained by splitting the input string by "{br}".
      */
-    public static @Unmodifiable List<String> formatLineBreaks(@NotNull String input) {
+    public static @Unmodifiable @NotNull List<String> formatLineBreaks(@NotNull String input) {
         return Arrays.asList(input.split("\n"));
     }
 

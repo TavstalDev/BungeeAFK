@@ -3,15 +3,15 @@ package net.fameless.core.caption;
 import org.jetbrains.annotations.Nullable;
 
 public enum Language {
-    ENGLISH("en", "<prefix><!bold><green>Language has been updated to english."),
-    GERMAN("de", "<prefix><!bold><green>Die Sprache wurde auf deutsch gesetzt.");
+    ENGLISH("en", "English"),
+    GERMAN("de", "Deutsch");
 
     private final String identifier;
-    private final String updateMessage;
+    private final String friendlyName;
 
-    Language(String identifier, String updateMessage) {
+    Language(String identifier, String friendlyName) {
         this.identifier = identifier;
-        this.updateMessage = updateMessage;
+        this.friendlyName = friendlyName;
     }
 
     public static @Nullable Language ofIdentifier(String identifier) {
@@ -23,8 +23,8 @@ public enum Language {
         return null;
     }
 
-    public String getUpdateMessage() {
-        return updateMessage;
+    public String getFriendlyName() {
+        return friendlyName;
     }
 
     public String getIdentifier() {

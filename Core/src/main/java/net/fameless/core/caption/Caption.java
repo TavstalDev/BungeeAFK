@@ -27,6 +27,7 @@ public final class Caption {
             .create();
 
     private Caption() {
+        throw new UnsupportedOperationException("This class cannot be instantiated.");
     }
 
     public static @NotNull Component of(String key, TagResolver... replacements) {

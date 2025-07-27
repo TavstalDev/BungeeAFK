@@ -4,13 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public final class YamlConfig {
-
-    private final Map<String, Object> data;
-
-    public YamlConfig(Map<String, Object> data) {
-        this.data = data;
-    }
+public record YamlConfig(Map<String, Object> data) {
 
     public void set(String key, Object value) {
         if (value == null) {
@@ -71,6 +65,7 @@ public final class YamlConfig {
         throw new IllegalArgumentException("Value for key '" + key + "' is not a Boolean");
     }
 
+    @SuppressWarnings("unchecked")
     public @NotNull Map<String, Object> getSection(String key) {
         Object val = data.get(key);
         if (val instanceof Map) {
@@ -81,9 +76,5 @@ public final class YamlConfig {
 
     public boolean contains(String key) {
         return data.containsKey(key);
-    }
-
-    public Map<String, Object> getData() {
-        return data;
     }
 }

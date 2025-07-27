@@ -12,7 +12,6 @@ import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.handling.Action;
 import net.fameless.core.util.StringUtil;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
@@ -183,18 +182,17 @@ public class MainCommand extends Command {
                 caller.sendMessage(Caption.of("command.languages_reloaded"));
                 return;
             }
-            Language newLanguage;
-            try {
-                newLanguage = Language.ofIdentifier(args[1]);
-                Caption.setCurrentLanguage(newLanguage);
-
-                String message = newLanguage.getUpdateMessage();
-                message = message.replace("<prefix>", Caption.getString("prefix"));
-
-                caller.sendMessage(MiniMessage.miniMessage().deserialize(message));
-            } catch (IllegalArgumentException e) {
+            Language newLanguage = Language.ofIdentifier(args[1]);
+            if (newLanguage == null) {
                 caller.sendMessage(Caption.of("command.invalid_language"));
+                return;
             }
+
+            Caption.setCurrentLanguage(newLanguage);
+            caller.sendMessage(Caption.of(
+                    "command.language_changed",
+                    TagResolver.resolver("language", Tag.inserting(Component.text(newLanguage.getFriendlyName())))
+            ));
         }
     }
 

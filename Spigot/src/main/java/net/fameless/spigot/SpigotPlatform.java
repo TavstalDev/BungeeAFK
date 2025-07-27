@@ -3,9 +3,7 @@ package net.fameless.spigot;
 import net.fameless.core.BungeeAFK;
 import net.fameless.core.BungeeAFKPlatform;
 import net.fameless.core.handling.Action;
-import net.kyori.adventure.text.Component;
 import org.bstats.bukkit.Metrics;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,16 +40,6 @@ public final class SpigotPlatform extends JavaPlugin implements BungeeAFKPlatfor
     @Override
     public void onDisable() {
         BungeeAFK.handleShutdown();
-    }
-
-    @Override
-    public void shutDown(String message) {
-        Bukkit.getPluginManager().disablePlugin(this);
-    }
-
-    @Override
-    public void broadcast(Component message) {
-        SpigotUtil.BUKKIT_AUDIENCES.all().sendMessage(message);
     }
 
     @Override

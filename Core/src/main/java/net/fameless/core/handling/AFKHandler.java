@@ -28,7 +28,7 @@ public abstract class AFKHandler {
             });
 
     private final Map<BAFKPlayer<?>, String> playerLastServerMap = new ConcurrentHashMap<>();
-    private final long UPDATE_PERIOD_MILLIS = 500L;
+    private static final long UPDATE_PERIOD_MILLIS = 500L;
 
     private Action action;
     private long warnDelay;
@@ -39,8 +39,6 @@ public abstract class AFKHandler {
     public AFKHandler() {
         if (BungeeAFK.getAFKHandler() != null) throw new IllegalStateException("AFKHandler is already initialized.");
         fetchConfigValues();
-
-        // try-catch block to handle exceptions that would otherwise silently halt the task
         this.scheduledTask = SCHEDULER.scheduleAtFixedRate(this::checkAFKPlayers, 0, UPDATE_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
         init();
     }
@@ -50,13 +48,11 @@ public abstract class AFKHandler {
             BAFKPlayer.PLAYERS.stream()
                     .filter(PlayerFilters.isOnline())
                     .forEach(player -> {
-                        AFKState afkState = player.getAfkState();
                         player.increaseTimeSinceLastAction(UPDATE_PERIOD_MILLIS);
-                        switch (afkState) {
+                        switch (player.getAfkState()) {
                             case ACTIVE -> handleWarning(player);
                             case WARNED -> handleAfkStatus(player);
                         }
-
                         handleAction(player);
                         updatePlayerStatus(player);
                         sendActionBar(player);
@@ -81,7 +77,6 @@ public abstract class AFKHandler {
 
         if (action == Action.CONNECT) {
             String serverName = PluginConfig.get().getString("afk-server-name", "");
-
             if (!BungeeAFK.platform().doesServerExist(serverName)) {
                 LOGGER.warn("AFK server not found. Defaulting to KICK.");
                 this.action = Action.KICK;
@@ -133,7 +128,7 @@ public abstract class AFKHandler {
             ));
             PluginMessage.broadcastMessageToFiltered(
                     Caption.of("notification.afk_broadcast",
-                    TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
+                            TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
                     PlayerFilters.matches(player).negate()
             );
             LOGGER.info("{} is now AFK.", player.getName());
@@ -148,9 +143,8 @@ public abstract class AFKHandler {
             player.connect(playerLastServerMap.getOrDefault(player, "lobby"));
         }
 
-        if (action == Action.NOTHING) return;
-        if (player.getAfkState() != AFKState.AFK) return;
-        if (player.getTimeSinceLastAction() < actionDelay) return;
+        if (action == Action.NOTHING || player.getAfkState() != AFKState.AFK || player.getTimeSinceLastAction() < actionDelay)
+            return;
 
         switch (action) {
             case CONNECT -> {
@@ -160,7 +154,7 @@ public abstract class AFKHandler {
                     player.kick(Caption.of("notification.afk_kick"));
                     PluginMessage.broadcastMessageToFiltered(
                             Caption.of("notification.afk_kick_broadcast",
-                            TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
+                                    TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
                             PlayerFilters.matches(player).negate()
                     );
                     LOGGER.info("Kicked {} for being AFK.", player.getName());
@@ -172,7 +166,7 @@ public abstract class AFKHandler {
                 player.sendMessage(Caption.of("notification.afk_disconnect"));
                 PluginMessage.broadcastMessageToFiltered(
                         Caption.of("notification.afk_disconnect_broadcast",
-                        TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
+                                TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
                         PlayerFilters.matches(player).negate()
                 );
                 LOGGER.info("Moved {} to AFK server.", player.getName());

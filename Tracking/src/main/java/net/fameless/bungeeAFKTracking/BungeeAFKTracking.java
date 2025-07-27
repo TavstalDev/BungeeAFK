@@ -25,22 +25,18 @@ public class BungeeAFKTracking extends JavaPlugin implements Listener {
     @EventHandler
     public void onMove(@NotNull PlayerMoveEvent event) {
         if (!event.getFrom().equals(event.getTo())) {
-            sendAction(event.getPlayer());
+            sendBungeeMessage(event.getPlayer());
         }
     }
 
     @EventHandler
     public void onChat(@NotNull AsyncPlayerChatEvent event) {
-        sendAction(event.getPlayer());
+        sendBungeeMessage(event.getPlayer());
     }
 
     @EventHandler
     public void onInteract(@NotNull PlayerInteractEvent event) {
-        sendAction(event.getPlayer());
-    }
-
-    private void sendAction(Player player) {
-        sendBungeeMessage(player);
+        sendBungeeMessage(event.getPlayer());
     }
 
     private void sendBungeeMessage(@NotNull Player player) {

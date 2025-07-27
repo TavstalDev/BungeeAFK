@@ -33,6 +33,7 @@
   "command.invalid_boolean": "<prefix><red>Please enter 'true' or 'false'.",
   "command.bypass_set": "<prefix><green>Allow bypass set to <allow>.",
   "command.afk_bypass": "<prefix><gray>You are currently bypassing AFK checks and cannot toggle AFK status.",
+  "command.language_changed": "<prefix><!bold><green>Language has been updated to <language>.",
   "error.no_caller_type": "<prefix><red>Invalid CallerType.",
   "actionbar.afk": "<blue>You are AFK"
 }
