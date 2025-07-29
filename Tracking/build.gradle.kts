@@ -14,7 +14,7 @@ dependencies {
 }
 
 group = "net.fameless"
-version = "2.1.0"
+version = "2.1.1"
 description = "Tracking plugin required by BungeeAFK"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
@@ -26,7 +26,7 @@ tasks {
     shadowJar {
         archiveBaseName.set("BungeeAFK-Tracking")
         archiveClassifier.set("")
-        archiveVersion.set("2.1.0")
+        archiveVersion.set("2.1.1")
     }
 
     jar {
