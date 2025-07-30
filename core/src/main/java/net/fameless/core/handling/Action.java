@@ -37,7 +37,7 @@ public enum Action {
 
         String serverName = PluginConfig.get().getString("afk-server-name", null);
         if (serverName == null) return false;
-        return BungeeAFK.platform().doesServerExist(serverName);
+        return BungeeAFK.getPlatform().doesServerExist(serverName);
     }
 
     public static @NotNull List<Action> getAvailableActions() {

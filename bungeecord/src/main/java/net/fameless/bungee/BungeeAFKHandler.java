@@ -2,6 +2,7 @@ package net.fameless.bungee;
 
 import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.handling.AFKState;
+import net.fameless.core.messaging.RequestType;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -30,17 +31,13 @@ public class BungeeAFKHandler extends AFKHandler implements Listener {
         if (!event.getTag().equals("bungee:bungeeafk")) return;
         String data = new String(event.getData());
         String[] parts = data.split(";");
-
+        if (!RequestType.ACTION_CAUGHT.matches(parts[0])) return;
         if (parts.length != 2) return;
 
-        UUID playerUUID = UUID.fromString(parts[0]);
-        String status = parts[1];
-
-        if (status.equals("action_caught")) {
-            BungeePlayer bungeePlayer = BungeePlayer.adapt(playerUUID).orElse(null);
-            if (bungeePlayer == null) return;
-            bungeePlayer.setTimeSinceLastAction(0);
-            bungeePlayer.setAfkState(AFKState.ACTIVE);
-        }
+        UUID playerUUID = UUID.fromString(parts[1]);
+        BungeePlayer bungeePlayer = BungeePlayer.adapt(playerUUID).orElse(null);
+        if (bungeePlayer == null) return;
+        bungeePlayer.setTimeSinceLastAction(0);
+        bungeePlayer.setAfkState(AFKState.ACTIVE);
     }
 }

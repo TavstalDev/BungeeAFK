@@ -1,9 +1,14 @@
 package net.fameless.velocity;
 
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
+import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import net.fameless.core.command.framework.CallerType;
 import net.fameless.core.event.EventDispatcher;
 import net.fameless.core.event.PlayerKickEvent;
+import net.fameless.core.location.Location;
+import net.fameless.core.messaging.RequestType;
 import net.fameless.core.player.BAFKPlayer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -123,5 +128,30 @@ public class VelocityPlayer extends BAFKPlayer<Player> {
         return player.getCurrentServer()
                 .map(serverConnection -> serverConnection.getServerInfo().getName())
                 .orElse("N/A");
+    }
+
+    @Override
+    public void teleport(Location location) {
+        Player player = getPlatformPlayer().orElse(null);
+        if (player == null) {
+            LOGGER.info("player is null, cannot teleport.");
+            return;
+        }
+        ServerConnection connection = player.getCurrentServer().orElse(null);
+        if (connection == null) {
+            LOGGER.info("player is not connected to a server, cannot teleport.");
+            return;
+        }
+        ChannelIdentifier identifier = MinecraftChannelIdentifier.create("bungee", "bungeeafk");
+        connection.sendPluginMessage(identifier,
+                (RequestType.TELEPORT_PLAYER.name().toLowerCase() + ";" +
+                        this.getUniqueId() + ";" +
+                        location.getWorldName() + ";" +
+                        location.getX() + ";" +
+                        location.getY() + ";" +
+                        location.getZ() + ";" +
+                        location.getYaw() + ";" +
+                        location.getPitch()
+                ).getBytes());
     }
 }

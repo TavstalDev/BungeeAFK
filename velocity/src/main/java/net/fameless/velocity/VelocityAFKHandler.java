@@ -6,6 +6,7 @@ import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.handling.AFKState;
+import net.fameless.core.messaging.RequestType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -30,17 +31,13 @@ public class VelocityAFKHandler extends AFKHandler {
         if (!event.getIdentifier().getId().equals("bungee:bungeeafk")) return;
         String data = new String(event.getData());
         String[] parts = data.split(";");
-
         if (parts.length != 2) return;
+        if (!RequestType.ACTION_CAUGHT.matches(parts[0])) return;
 
-        UUID playerUUID = UUID.fromString(parts[0]);
-        String status = parts[1];
-
-        if (status.equals("action_caught")) {
-            VelocityPlayer velocityPlayer = VelocityPlayer.adapt(playerUUID).orElse(null);
-            if (velocityPlayer == null) return;
-            velocityPlayer.setTimeSinceLastAction(0);
-            velocityPlayer.setAfkState(AFKState.ACTIVE);
-        }
+        UUID playerUUID = UUID.fromString(parts[1]);
+        VelocityPlayer velocityPlayer = VelocityPlayer.adapt(playerUUID).orElse(null);
+        if (velocityPlayer == null) return;
+        velocityPlayer.setTimeSinceLastAction(0);
+        velocityPlayer.setAfkState(AFKState.ACTIVE);
     }
 }

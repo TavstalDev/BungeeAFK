@@ -3,10 +3,11 @@ package net.fameless.core.handling;
 import net.fameless.core.BungeeAFK;
 import net.fameless.core.caption.Caption;
 import net.fameless.core.config.PluginConfig;
+import net.fameless.core.location.Location;
 import net.fameless.core.player.BAFKPlayer;
 import net.fameless.core.util.Format;
 import net.fameless.core.util.PlayerFilters;
-import net.fameless.core.util.PluginMessage;
+import net.fameless.core.util.MessageBroadcaster;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -77,7 +78,7 @@ public abstract class AFKHandler {
 
         if (action == Action.CONNECT) {
             String serverName = PluginConfig.get().getString("afk-server-name", "");
-            if (!BungeeAFK.platform().doesServerExist(serverName)) {
+            if (!BungeeAFK.getPlatform().doesServerExist(serverName)) {
                 LOGGER.warn("AFK server not found. Defaulting to KICK.");
                 this.action = Action.KICK;
             }
@@ -126,7 +127,7 @@ public abstract class AFKHandler {
                     action.getMessageKey(),
                     TagResolver.resolver("action-delay", Tag.inserting(Component.text(Format.formatTime((int) (timeUntilAction / 1000)))))
             ));
-            PluginMessage.broadcastMessageToFiltered(
+            MessageBroadcaster.broadcastMessageToFiltered(
                     Caption.of("notification.afk_broadcast",
                             TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
                     PlayerFilters.matches(player).negate()
@@ -152,7 +153,7 @@ public abstract class AFKHandler {
                     LOGGER.warn("AFK server not found. Defaulting to KICK.");
                     this.action = Action.KICK;
                     player.kick(Caption.of("notification.afk_kick"));
-                    PluginMessage.broadcastMessageToFiltered(
+                    MessageBroadcaster.broadcastMessageToFiltered(
                             Caption.of("notification.afk_kick_broadcast",
                                     TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
                             PlayerFilters.matches(player).negate()
@@ -164,7 +165,7 @@ public abstract class AFKHandler {
                 playerLastServerMap.put(player, currentServerName);
                 player.connect(afkServerName);
                 player.sendMessage(Caption.of("notification.afk_disconnect"));
-                PluginMessage.broadcastMessageToFiltered(
+                MessageBroadcaster.broadcastMessageToFiltered(
                         Caption.of("notification.afk_disconnect_broadcast",
                                 TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
                         PlayerFilters.matches(player).negate()
@@ -173,7 +174,7 @@ public abstract class AFKHandler {
             }
             case KICK -> {
                 player.kick(Caption.of("notification.afk_kick"));
-                PluginMessage.broadcastMessageToFiltered(
+                MessageBroadcaster.broadcastMessageToFiltered(
                         Caption.of("notification.afk_kick_broadcast",
                                 TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))));
                 LOGGER.info("Kicked {} for being AFK.", player.getName());

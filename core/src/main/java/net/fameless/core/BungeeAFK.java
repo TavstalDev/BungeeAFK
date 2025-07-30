@@ -83,7 +83,7 @@ public class BungeeAFK {
         return afkHandler;
     }
 
-    public static BungeeAFKPlatform platform() {
+    public static BungeeAFKPlatform getPlatform() {
         return platform;
     }
 }

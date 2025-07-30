@@ -121,4 +121,9 @@ public class SpigotPlayer extends BAFKPlayer<Player> {
     public String getCurrentServerName() {
         return ""; // Not needed for SpigotPlatform
     }
+
+    @Override
+    public void teleport(net.fameless.core.location.Location location) {
+        getPlatformPlayer().ifPresent(player -> player.teleport(SpigotLocationAdapter.adapt(location)));
+    }
 }

@@ -6,7 +6,7 @@ import net.kyori.adventure.text.Component;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class PluginMessage {
+public class MessageBroadcaster {
 
     @SafeVarargs
     public static void broadcastMessageToFiltered(Component message, Predicate<BAFKPlayer<?>> ...filters) {

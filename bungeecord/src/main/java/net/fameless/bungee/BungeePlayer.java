@@ -3,6 +3,8 @@ package net.fameless.bungee;
 import net.fameless.core.command.framework.CallerType;
 import net.fameless.core.event.EventDispatcher;
 import net.fameless.core.event.PlayerKickEvent;
+import net.fameless.core.location.Location;
+import net.fameless.core.messaging.RequestType;
 import net.fameless.core.player.BAFKPlayer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -135,5 +137,25 @@ public class BungeePlayer extends BAFKPlayer<ProxiedPlayer> {
         }
         Server playerServer = player.getServer();
         return playerServer != null ? playerServer.getInfo().getName() : "N/A";
+    }
+
+    @Override
+    public void teleport(Location location) {
+        ProxiedPlayer player = getPlatformPlayer().orElse(null);
+        if (player == null) {
+            LOGGER.info("player is null, cannot teleport.");
+            return;
+        }
+
+        byte[] data = (RequestType.TELEPORT_PLAYER.name().toLowerCase() + ";" +
+                this.getUniqueId() + ";" +
+                location.getWorldName() + ";" +
+                location.getX() + ";" +
+                location.getY() + ";" +
+                location.getZ() + ";" +
+                location.getYaw() + ";" +
+                location.getPitch()
+        ).getBytes();
+        player.getServer().getInfo().sendData("bungee:bungeeafk", data);
     }
 }
