@@ -10,6 +10,7 @@ import net.fameless.core.command.framework.Command;
 import net.fameless.core.config.PluginConfig;
 import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.handling.Action;
+import net.fameless.core.location.Location;
 import net.fameless.core.util.PluginUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,7 @@ public class BungeeAFK {
         );
 
         PluginConfig.init();
+        LOGGER.info("Configured AFK-Location: {}", Location.getConfiguredAfkZone());
         PluginUpdater.runTask();
 
         platform = injector.getInstance(BungeeAFKPlatform.class);
@@ -83,7 +85,7 @@ public class BungeeAFK {
         return afkHandler;
     }
 
-    public static BungeeAFKPlatform platform() {
+    public static BungeeAFKPlatform getPlatform() {
         return platform;
     }
 }

@@ -19,4 +19,8 @@ public class PluginPaths {
         return new File(BASE_FOLDER, "config.yml");
     }
 
+    public static @NotNull File getPersistedStatesFile() {
+        return new File(BASE_FOLDER + File.separator + "storage", "persisted_states.json");
+    }
+
 }

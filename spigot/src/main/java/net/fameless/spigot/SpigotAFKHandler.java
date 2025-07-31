@@ -21,6 +21,7 @@ public class SpigotAFKHandler extends AFKHandler implements Listener {
     private void actionCaught(@NotNull SpigotPlayer spigotPlayer) {
         spigotPlayer.setTimeSinceLastAction(0);
         spigotPlayer.setAfkState(AFKState.ACTIVE);
+        handleAction(spigotPlayer);
     }
 
     @EventHandler(ignoreCancelled = true)

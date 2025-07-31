@@ -11,6 +11,7 @@
   "notification.afk_kick_broadcast": "<prefix><gray><player> wurde gekickt, weil er zu lange AFK war.",
   "notification.action.kick": "<prefix><gray>Du bist jetzt AFK und wirst in <action-delay> gekickt.",
   "notification.action.connect": "<prefix><gray>Du bist jetzt AFK und wirst in <action-delay> auf den AFK-Server connected.",
+  "notification.action.teleport": "<prefix><gray>Du bist jetzt AFK und wirst in <action-delay> zum AFK-Standort teleportiert.",
   "notification.action.nothing": "<prefix><gray>Du bist jetzt AFK.",
   "notification.action_unavailable": "<prefix><red>Die Aktion ist nicht verfügbar.",
   "permission.no_permission": "<prefix><red>Die fehlt dazu die Berechtigung: <permission>.",
