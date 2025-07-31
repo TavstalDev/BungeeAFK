@@ -29,9 +29,14 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
     protected String name;
     private final UUID uuid;
     private long timeSinceLastAction = 0;
-    private AFKState afkState;
+    private AFKState afkState = AFKState.ACTIVE;
+    private GameMode gameMode = GameMode.SURVIVAL;
+    private Location location = new Location("world", 0, 0, 0, 0, 0);
 
     public BAFKPlayer(UUID uuid) {
+        if (of(uuid).isPresent()) {
+            throw new IllegalArgumentException("A player with this UUID already exists: " + uuid);
+        }
         this.uuid = uuid;
         PLAYERS.add(this);
     }
@@ -107,6 +112,22 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
         getAudience().playSound(sound);
     }
 
+    public GameMode getGameMode() {
+        return gameMode;
+    }
+
+    public void setGameMode(GameMode gameMode) {
+        this.gameMode = gameMode;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
     public abstract String getName();
 
     public abstract Audience getAudience();
@@ -122,6 +143,8 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
     public abstract boolean hasPermission(String permission);
 
     public abstract String getCurrentServerName();
+
+    public abstract void updateGameMode(GameMode gameMode);
 
     public abstract void teleport(Location location);
 }

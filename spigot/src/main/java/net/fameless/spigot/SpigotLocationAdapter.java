@@ -6,6 +6,8 @@ import org.bukkit.World;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class SpigotLocationAdapter {
 
     @Contract("_ -> new")
@@ -21,6 +23,18 @@ public class SpigotLocationAdapter {
             location.getZ(),
             location.getYaw(),
             location.getPitch()
+        );
+    }
+
+    @Contract("_ -> new")
+    public static net.fameless.core.location.@NotNull Location adapt(@NotNull Location location) {
+        return new net.fameless.core.location.Location(
+            Objects.requireNonNull(location.getWorld()).getName(),
+            location.getX(),
+            location.getY(),
+            location.getZ(),
+            location.getPitch(),
+            location.getYaw()
         );
     }
 

@@ -1,13 +1,15 @@
 package net.fameless.core.handling;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import net.fameless.core.BungeeAFK;
 import net.fameless.core.caption.Caption;
 import net.fameless.core.config.PluginConfig;
 import net.fameless.core.location.Location;
 import net.fameless.core.player.BAFKPlayer;
-import net.fameless.core.util.Format;
-import net.fameless.core.util.PlayerFilters;
-import net.fameless.core.util.MessageBroadcaster;
+import net.fameless.core.player.GameMode;
+import net.fameless.core.util.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -15,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -27,8 +30,14 @@ public abstract class AFKHandler {
                 t.setDaemon(true);
                 return t;
             });
+    private static final Gson GSON = new GsonBuilder()
+            .setPrettyPrinting()
+            .disableHtmlEscaping()
+            .create();
 
-    private final Map<BAFKPlayer<?>, String> playerLastServerMap = new ConcurrentHashMap<>();
+    private final Map<BAFKPlayer<?>, String> playerPreviousServerMap = new ConcurrentHashMap<>();
+    private final Map<BAFKPlayer<?>, Location> playerPreviousLocationMap = new ConcurrentHashMap<>();
+    private final Map<BAFKPlayer<?>, GameMode> playerPreviousGameModeMap = new ConcurrentHashMap<>();
     private static final long UPDATE_PERIOD_MILLIS = 500L;
 
     private Action action;
@@ -37,11 +46,30 @@ public abstract class AFKHandler {
     private long actionDelay;
     private final ScheduledFuture<?> scheduledTask;
 
+    private JsonObject locationObject;
+    private JsonObject gameModeObject;
+    private JsonObject serverObject;
+
     public AFKHandler() {
         if (BungeeAFK.getAFKHandler() != null) throw new IllegalStateException("AFKHandler is already initialized.");
         fetchConfigValues();
         this.scheduledTask = SCHEDULER.scheduleAtFixedRate(this::checkAFKPlayers, 0, UPDATE_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
+        initJsonObjects();
         init();
+    }
+
+    private void initJsonObjects() {
+        File playerStatesFile = createPersistedStatesFileIfNotExists();
+        JsonObject root;
+        try (FileReader reader = new FileReader(playerStatesFile)) {
+            root = GSON.fromJson(reader, JsonObject.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (locationObject == null) locationObject = root.has("location") ? root.getAsJsonObject("location") : new JsonObject();
+        if (gameModeObject == null) gameModeObject = root.has("game_mode") ? root.getAsJsonObject("game_mode") : new JsonObject();
+        if (serverObject == null) serverObject = root.has("server") ? root.getAsJsonObject("server") : new JsonObject();
     }
 
     private void checkAFKPlayers() {
@@ -62,6 +90,47 @@ public abstract class AFKHandler {
             LOGGER.error("Error during AFK check task", e);
             scheduledTask.cancel(false);
         }
+    }
+
+    public void fetchPreviousPlayerState(@NotNull BAFKPlayer<?> player) {
+        if (locationObject.has(player.getUniqueId().toString())) {
+            JsonObject playerLocation = locationObject.getAsJsonObject(player.getUniqueId().toString());
+            playerPreviousLocationMap.put(player, new Location(
+                    playerLocation.get("worldName").getAsString(),
+                    playerLocation.get("x").getAsDouble(),
+                    playerLocation.get("y").getAsDouble(),
+                    playerLocation.get("z").getAsDouble(),
+                    playerLocation.get("pitch").getAsFloat(),
+                    playerLocation.get("yaw").getAsFloat()
+            ));
+        }
+
+        if (gameModeObject.has(player.getUniqueId().toString())) {
+            String gameModeStr = gameModeObject.get(player.getUniqueId().toString()).getAsString();
+            try {
+                GameMode gameMode = GameMode.valueOf(gameModeStr.toUpperCase());
+                playerPreviousGameModeMap.put(player, gameMode);
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("Invalid game mode for player {}: {}", player.getName(), gameModeStr);
+            }
+        }
+
+        if (serverObject.has(player.getUniqueId().toString())) {
+            String previousServer = serverObject.get(player.getUniqueId().toString()).getAsString();
+            playerPreviousServerMap.put(player, previousServer);
+        }
+
+        locationObject.remove(player.getUniqueId().toString());
+        gameModeObject.remove(player.getUniqueId().toString());
+        serverObject.remove(player.getUniqueId().toString());
+    }
+
+    private @NotNull File createPersistedStatesFileIfNotExists() {
+        File playerStatesFile = PluginPaths.getPersistedStatesFile();
+        if (!playerStatesFile.exists()) {
+            ResourceUtil.extractResourceIfMissing("persisted_player_states.json", playerStatesFile);
+        }
+        return playerStatesFile;
     }
 
     public void fetchConfigValues() {
@@ -89,6 +158,29 @@ public abstract class AFKHandler {
         if (scheduledTask != null && !scheduledTask.isCancelled()) {
             scheduledTask.cancel(true);
         }
+
+        for (Map.Entry<BAFKPlayer<?>, String> entry : playerPreviousServerMap.entrySet()) {
+            serverObject.addProperty(entry.getKey().getUniqueId().toString(), entry.getValue());
+        }
+        for (Map.Entry<BAFKPlayer<?>, GameMode> entry : playerPreviousGameModeMap.entrySet()) {
+            gameModeObject.addProperty(entry.getKey().getUniqueId().toString(), entry.getValue().name());
+        }
+        for (Map.Entry<BAFKPlayer<?>, Location> entry : playerPreviousLocationMap.entrySet()) {
+            locationObject.add(entry.getKey().getUniqueId().toString(), entry.getValue().getAsJsonObject());
+        }
+
+        JsonObject root = new JsonObject();
+        root.add("location", locationObject);
+        root.add("game_mode", gameModeObject);
+        root.add("server", serverObject);
+
+        File playerStatesFile = createPersistedStatesFileIfNotExists();
+        try (FileWriter writer = new FileWriter(playerStatesFile)) {
+            GSON.toJson(root, writer);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         SCHEDULER.shutdownNow();
         LOGGER.info("AFK handler successfully shutdown.");
     }
@@ -136,13 +228,9 @@ public abstract class AFKHandler {
         }
     }
 
-    private void handleAction(@NotNull BAFKPlayer<?> player) {
+    public void handleAction(@NotNull BAFKPlayer<?> player) {
         if (player.getAfkState() == AFKState.ACTION_TAKEN) return;
-
-        String afkServerName = PluginConfig.get().getString("afk-server-name", "");
-        if (player.getCurrentServerName().equalsIgnoreCase(afkServerName)) {
-            player.connect(playerLastServerMap.getOrDefault(player, "lobby"));
-        }
+        revertPreviousState(player);
 
         if (action == Action.NOTHING || player.getAfkState() != AFKState.AFK || player.getTimeSinceLastAction() < actionDelay)
             return;
@@ -162,7 +250,8 @@ public abstract class AFKHandler {
                     return;
                 }
                 String currentServerName = player.getCurrentServerName();
-                playerLastServerMap.put(player, currentServerName);
+                String afkServerName = PluginConfig.get().getString("afk-server-name", "");
+                playerPreviousServerMap.put(player, currentServerName);
                 player.connect(afkServerName);
                 player.sendMessage(Caption.of("notification.afk_disconnect"));
                 MessageBroadcaster.broadcastMessageToFiltered(
@@ -179,6 +268,26 @@ public abstract class AFKHandler {
                                 TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))));
                 LOGGER.info("Kicked {} for being AFK.", player.getName());
             }
+            case TELEPORT -> {
+                playerPreviousLocationMap.put(player, player.getLocation());
+                playerPreviousGameModeMap.put(player, player.getGameMode());
+                player.updateGameMode(GameMode.SPECTATOR);
+                player.teleport(Location.getConfiguredAfkZone());
+            }
+        }
+    }
+
+    public void revertPreviousState(@NotNull BAFKPlayer<?> player) {
+        String afkServerName = PluginConfig.get().getString("afk-server-name", "");
+        if (player.getCurrentServerName().equalsIgnoreCase(afkServerName)) {
+            player.connect(playerPreviousServerMap.getOrDefault(player, "lobby"));
+        }
+
+        if (playerPreviousLocationMap.containsKey(player) && playerPreviousGameModeMap.containsKey(player)) {
+            player.teleport(playerPreviousLocationMap.get(player));
+            player.updateGameMode(playerPreviousGameModeMap.get(player));
+            playerPreviousLocationMap.remove(player);
+            playerPreviousGameModeMap.remove(player);
         }
     }
 
@@ -195,6 +304,13 @@ public abstract class AFKHandler {
         } else {
             player.setAfkState(AFKState.ACTION_TAKEN);
         }
+    }
+
+    public void handleJoin(@NotNull BAFKPlayer<?> player) {
+        player.setTimeSinceLastAction(0);
+        player.setAfkState(AFKState.ACTIVE);
+        fetchPreviousPlayerState(player);
+        revertPreviousState(player);
     }
 
     private void sendActionBar(@NotNull BAFKPlayer<?> player) {

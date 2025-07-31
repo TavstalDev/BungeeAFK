@@ -1,13 +1,28 @@
 package net.fameless.core.location;
 
+import com.google.gson.JsonObject;
+import net.fameless.core.config.PluginConfig;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
+
 public class Location {
+
+    public static @NotNull Location getConfiguredAfkZone() {
+        Map<String, Object> afkZone = PluginConfig.get().getSection("afk-location");
+        String worldName = afkZone.get("world").toString();
+        double x = Double.parseDouble(afkZone.get("x").toString());
+        double y = Double.parseDouble(afkZone.get("y").toString());
+        double z = Double.parseDouble(afkZone.get("z").toString());
+        return new Location(worldName, x, y, z);
+    }
 
     private String worldName;
     private double x;
     private double y;
     private double z;
-    private float pitch;
-    private float yaw;
+    private float pitch = 0.0f;
+    private float yaw = 0.0f;
 
     public Location(String worldName, double x, double y, double z, float pitch, float yaw) {
         this.worldName = worldName;
@@ -16,6 +31,13 @@ public class Location {
         this.z = z;
         this.pitch = pitch;
         this.yaw = yaw;
+    }
+
+    public Location(String worldName, double x, double y, double z) {
+        this.worldName = worldName;
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     public String getWorldName() {
@@ -64,5 +86,21 @@ public class Location {
 
     public void setYaw(float yaw) {
         this.yaw = yaw;
+    }
+
+    public JsonObject getAsJsonObject() {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("worldName", worldName);
+        obj.addProperty("x", x);
+        obj.addProperty("y", y);
+        obj.addProperty("z", z);
+        obj.addProperty("pitch", pitch);
+        obj.addProperty("yaw", yaw);
+        return obj;
+    }
+
+    @Override
+    public String toString() {
+        return getAsJsonObject().toString();
     }
 }

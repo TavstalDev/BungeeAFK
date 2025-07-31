@@ -10,6 +10,7 @@ import net.fameless.core.event.PlayerKickEvent;
 import net.fameless.core.location.Location;
 import net.fameless.core.messaging.RequestType;
 import net.fameless.core.player.BAFKPlayer;
+import net.fameless.core.player.GameMode;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -31,10 +32,7 @@ public class VelocityPlayer extends BAFKPlayer<Player> {
 
     public static @NotNull VelocityPlayer adapt(Player player) {
         for (VelocityPlayer velocityPlayer : VELOCITY_PLAYERS) {
-            Optional<Player> platformPlayerOptional = velocityPlayer.getPlatformPlayer();
-            if (platformPlayerOptional.isEmpty()) continue;
-
-            if (velocityPlayer.getPlatformPlayer().get().getUniqueId().equals(player.getUniqueId())) {
+            if (velocityPlayer.getUniqueId().equals(player.getUniqueId())) {
                 return velocityPlayer;
             }
         }
@@ -128,6 +126,26 @@ public class VelocityPlayer extends BAFKPlayer<Player> {
         return player.getCurrentServer()
                 .map(serverConnection -> serverConnection.getServerInfo().getName())
                 .orElse("N/A");
+    }
+
+    @Override
+    public void updateGameMode(GameMode gameMode) {
+        Player player = getPlatformPlayer().orElse(null);
+        if (player == null) {
+            LOGGER.info("player is null, cannot set gamemode.");
+            return;
+        }
+        ServerConnection connection = player.getCurrentServer().orElse(null);
+        if (connection == null) {
+            LOGGER.info("player is not connected to a server, cannot set gamemode.");
+            return;
+        }
+        ChannelIdentifier identifier = MinecraftChannelIdentifier.create("bungee", "bungeeafk");
+        connection.sendPluginMessage(identifier,
+                (RequestType.SET_GAMEMODE.name().toLowerCase() + ";" +
+                        this.getUniqueId() + ";" +
+                        gameMode.name()
+                ).getBytes());
     }
 
     @Override

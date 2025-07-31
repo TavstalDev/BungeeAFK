@@ -32,6 +32,14 @@ public class YamlUtil {
                 "# !!! Only available for BungeeCord and Velocity !!!" + "\n" +
                 "afk-server-name: " + PluginConfig.get().getString("afk-server-name", "") + "\n" +
                 "\n" +
+                "# AFK zone configuration\n" +
+                "# If the action is set to \"teleport\", the player will be teleported to this location\n" +
+                "afk-location:\n" +
+                "  world: " + PluginConfig.get().getSection("afk-location").get("world") + "\n" +
+                "  x: " + PluginConfig.get().getSection("afk-location").get("x") + "\n" +
+                "  y: " + PluginConfig.get().getSection("afk-location").get("y") + "\n" +
+                "  z: " + PluginConfig.get().getSection("afk-location").get("z") + "\n" +
+                "\n" +
                 "# Whether to allow bypass of AFK detection for players with the \"afk.bypass\" permission\n" +
                 "allow-bypass: " + PluginConfig.get().getBoolean("allow-bypass", true) + "\n";
     }

@@ -6,6 +6,7 @@ import net.fameless.core.event.PlayerKickEvent;
 import net.fameless.core.location.Location;
 import net.fameless.core.messaging.RequestType;
 import net.fameless.core.player.BAFKPlayer;
+import net.fameless.core.player.GameMode;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
@@ -140,7 +141,20 @@ public class BungeePlayer extends BAFKPlayer<ProxiedPlayer> {
     }
 
     @Override
-    public void teleport(Location location) {
+    public void updateGameMode(@NotNull GameMode gameMode) {
+        ProxiedPlayer player = getPlatformPlayer().orElse(null);
+        if (player == null) {
+            LOGGER.info("player is null, cannot set gamemode.");
+            return;
+        }
+        byte[] data = (RequestType.GAMEMODE_CHANGE.name().toLowerCase() + ";" +
+                this.getUniqueId() + ";" +
+                gameMode.name()).getBytes();
+        player.getServer().getInfo().sendData("bungee:bungeeafk", data);
+    }
+
+    @Override
+    public void teleport(@NotNull Location location) {
         ProxiedPlayer player = getPlatformPlayer().orElse(null);
         if (player == null) {
             LOGGER.info("player is null, cannot teleport.");

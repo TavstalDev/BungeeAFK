@@ -3,13 +3,16 @@ package net.fameless.spigot;
 import net.fameless.core.command.framework.CallerType;
 import net.fameless.core.event.EventDispatcher;
 import net.fameless.core.event.PlayerKickEvent;
+import net.fameless.core.location.Location;
 import net.fameless.core.player.BAFKPlayer;
+import net.fameless.core.player.GameMode;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,7 +126,22 @@ public class SpigotPlayer extends BAFKPlayer<Player> {
     }
 
     @Override
+    public @Nullable Location getLocation() {
+        Player player = getPlatformPlayer().orElse(null);
+        if (player == null) {
+            return null;
+        }
+        return SpigotLocationAdapter.adapt(player.getLocation());
+    }
+
+    @Override
+    public void updateGameMode(GameMode gameMode) {
+        getPlatformPlayer().ifPresent(player -> player.setGameMode(org.bukkit.GameMode.valueOf(gameMode.name())));
+    }
+
+    @Override
     public void teleport(net.fameless.core.location.Location location) {
         getPlatformPlayer().ifPresent(player -> player.teleport(SpigotLocationAdapter.adapt(location)));
     }
+
 }

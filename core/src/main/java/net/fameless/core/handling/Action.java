@@ -11,6 +11,7 @@ public enum Action {
 
     KICK,
     CONNECT,
+    TELEPORT,
     NOTHING;
 
     private static final List<Action> excludedActions = new ArrayList<>();
