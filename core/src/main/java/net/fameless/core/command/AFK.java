@@ -35,7 +35,11 @@ public class AFK extends Command {
                 player.setAfkState(AFKState.WARNED);
                 player.setTimeSinceLastAction(afkHandler.getAfkDelayMillis());
             }
-            default -> player.setTimeSinceLastAction(0);
+            default -> {
+                player.setTimeSinceLastAction(0);
+                player.setAfkState(AFKState.ACTIVE);
+                afkHandler.handleAction(player);
+            }
         }
     }
 

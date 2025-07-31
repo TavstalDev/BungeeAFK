@@ -136,12 +136,22 @@ public class SpigotPlayer extends BAFKPlayer<Player> {
 
     @Override
     public void updateGameMode(GameMode gameMode) {
-        getPlatformPlayer().ifPresent(player -> player.setGameMode(org.bukkit.GameMode.valueOf(gameMode.name())));
+        Bukkit.getScheduler().runTask(SpigotPlatform.get(), () -> getPlatformPlayer().ifPresent(player -> player.setGameMode(org.bukkit.GameMode.valueOf(gameMode.name()))));
     }
 
     @Override
     public void teleport(net.fameless.core.location.Location location) {
-        getPlatformPlayer().ifPresent(player -> player.teleport(SpigotLocationAdapter.adapt(location)));
+        Bukkit.getScheduler().runTask(SpigotPlatform.get(), () -> getPlatformPlayer().ifPresent(player -> player.teleport(SpigotLocationAdapter.adapt(location))));
+
+    }
+
+    @Override
+    public GameMode getGameMode() {
+        Player player = getPlatformPlayer().orElse(null);
+        if (player == null) {
+            return GameMode.SURVIVAL;
+        }
+        return GameMode.valueOf(player.getGameMode().name());
     }
 
 }

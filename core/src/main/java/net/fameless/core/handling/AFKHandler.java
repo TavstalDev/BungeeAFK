@@ -2,6 +2,7 @@ package net.fameless.core.handling;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fameless.core.BungeeAFK;
 import net.fameless.core.caption.Caption;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 public abstract class AFKHandler {
@@ -35,9 +37,9 @@ public abstract class AFKHandler {
             .disableHtmlEscaping()
             .create();
 
-    private final Map<BAFKPlayer<?>, String> playerPreviousServerMap = new ConcurrentHashMap<>();
-    private final Map<BAFKPlayer<?>, Location> playerPreviousLocationMap = new ConcurrentHashMap<>();
-    private final Map<BAFKPlayer<?>, GameMode> playerPreviousGameModeMap = new ConcurrentHashMap<>();
+    private final Map<UUID, String> playerPreviousServerMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Location> playerPreviousLocationMap = new ConcurrentHashMap<>();
+    private final Map<UUID, GameMode> playerPreviousGameModeMap = new ConcurrentHashMap<>();
     private static final long UPDATE_PERIOD_MILLIS = 500L;
 
     private Action action;
@@ -46,30 +48,12 @@ public abstract class AFKHandler {
     private long actionDelay;
     private final ScheduledFuture<?> scheduledTask;
 
-    private JsonObject locationObject;
-    private JsonObject gameModeObject;
-    private JsonObject serverObject;
-
     public AFKHandler() {
         if (BungeeAFK.getAFKHandler() != null) throw new IllegalStateException("AFKHandler is already initialized.");
         fetchConfigValues();
         this.scheduledTask = SCHEDULER.scheduleAtFixedRate(this::checkAFKPlayers, 0, UPDATE_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
-        initJsonObjects();
+        fetchPreviousPlayerStates();
         init();
-    }
-
-    private void initJsonObjects() {
-        File playerStatesFile = createPersistedStatesFileIfNotExists();
-        JsonObject root;
-        try (FileReader reader = new FileReader(playerStatesFile)) {
-            root = GSON.fromJson(reader, JsonObject.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        if (locationObject == null) locationObject = root.has("location") ? root.getAsJsonObject("location") : new JsonObject();
-        if (gameModeObject == null) gameModeObject = root.has("game_mode") ? root.getAsJsonObject("game_mode") : new JsonObject();
-        if (serverObject == null) serverObject = root.has("server") ? root.getAsJsonObject("server") : new JsonObject();
     }
 
     private void checkAFKPlayers() {
@@ -92,37 +76,48 @@ public abstract class AFKHandler {
         }
     }
 
-    public void fetchPreviousPlayerState(@NotNull BAFKPlayer<?> player) {
-        if (locationObject.has(player.getUniqueId().toString())) {
-            JsonObject playerLocation = locationObject.getAsJsonObject(player.getUniqueId().toString());
-            playerPreviousLocationMap.put(player, new Location(
-                    playerLocation.get("worldName").getAsString(),
-                    playerLocation.get("x").getAsDouble(),
-                    playerLocation.get("y").getAsDouble(),
-                    playerLocation.get("z").getAsDouble(),
-                    playerLocation.get("pitch").getAsFloat(),
-                    playerLocation.get("yaw").getAsFloat()
+    public void fetchPreviousPlayerStates() {
+        File playerStatesFile = createPersistedStatesFileIfNotExists();
+        JsonObject root;
+        try (FileReader reader = new FileReader(playerStatesFile)) {
+            root = GSON.fromJson(reader, JsonObject.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        JsonObject locationObject = root.has("location") ? root.getAsJsonObject("location") : new JsonObject();
+        JsonObject gameModeObject = root.has("game_mode") ? root.getAsJsonObject("game_mode") : new JsonObject();
+        JsonObject serverObject = root.has("server") ? root.getAsJsonObject("server") : new JsonObject();
+
+        for (Map.Entry<String, JsonElement> entry : locationObject.entrySet()) {
+            UUID playerUUID = UUID.fromString(entry.getKey());
+            JsonObject locationData = entry.getValue().getAsJsonObject();
+            playerPreviousLocationMap.put(playerUUID, new Location(
+                    locationData.get("worldName").getAsString(),
+                    locationData.get("x").getAsDouble(),
+                    locationData.get("y").getAsDouble(),
+                    locationData.get("z").getAsDouble(),
+                    locationData.get("pitch").getAsFloat(),
+                    locationData.get("yaw").getAsFloat()
             ));
         }
 
-        if (gameModeObject.has(player.getUniqueId().toString())) {
-            String gameModeStr = gameModeObject.get(player.getUniqueId().toString()).getAsString();
+        for (Map.Entry<String, JsonElement> entry : gameModeObject.entrySet()) {
+            UUID playerUUID = UUID.fromString(entry.getKey());
+            String gameModeStr = entry.getValue().getAsString();
             try {
                 GameMode gameMode = GameMode.valueOf(gameModeStr.toUpperCase());
-                playerPreviousGameModeMap.put(player, gameMode);
+                playerPreviousGameModeMap.put(playerUUID, gameMode);
             } catch (IllegalArgumentException e) {
-                LOGGER.warn("Invalid game mode for player {}: {}", player.getName(), gameModeStr);
+                LOGGER.warn("Invalid game mode for player {}: {}", playerUUID, gameModeStr);
             }
         }
 
-        if (serverObject.has(player.getUniqueId().toString())) {
-            String previousServer = serverObject.get(player.getUniqueId().toString()).getAsString();
-            playerPreviousServerMap.put(player, previousServer);
+        for (Map.Entry<String, JsonElement> entry : serverObject.entrySet()) {
+            UUID playerUUID = UUID.fromString(entry.getKey());
+            String previousServer = entry.getValue().getAsString();
+            playerPreviousServerMap.put(playerUUID, previousServer);
         }
-
-        locationObject.remove(player.getUniqueId().toString());
-        gameModeObject.remove(player.getUniqueId().toString());
-        serverObject.remove(player.getUniqueId().toString());
     }
 
     private @NotNull File createPersistedStatesFileIfNotExists() {
@@ -159,14 +154,18 @@ public abstract class AFKHandler {
             scheduledTask.cancel(true);
         }
 
-        for (Map.Entry<BAFKPlayer<?>, String> entry : playerPreviousServerMap.entrySet()) {
-            serverObject.addProperty(entry.getKey().getUniqueId().toString(), entry.getValue());
+        JsonObject locationObject = new JsonObject();
+        JsonObject gameModeObject = new JsonObject();
+        JsonObject serverObject = new JsonObject();
+
+        for (Map.Entry<UUID, String> entry : playerPreviousServerMap.entrySet()) {
+            serverObject.addProperty(entry.getKey().toString(), entry.getValue());
         }
-        for (Map.Entry<BAFKPlayer<?>, GameMode> entry : playerPreviousGameModeMap.entrySet()) {
-            gameModeObject.addProperty(entry.getKey().getUniqueId().toString(), entry.getValue().name());
+        for (Map.Entry<UUID, GameMode> entry : playerPreviousGameModeMap.entrySet()) {
+            gameModeObject.addProperty(entry.getKey().toString(), entry.getValue().name());
         }
-        for (Map.Entry<BAFKPlayer<?>, Location> entry : playerPreviousLocationMap.entrySet()) {
-            locationObject.add(entry.getKey().getUniqueId().toString(), entry.getValue().getAsJsonObject());
+        for (Map.Entry<UUID, Location> entry : playerPreviousLocationMap.entrySet()) {
+            locationObject.add(entry.getKey().toString(), entry.getValue().getAsJsonObject());
         }
 
         JsonObject root = new JsonObject();
@@ -251,7 +250,7 @@ public abstract class AFKHandler {
                 }
                 String currentServerName = player.getCurrentServerName();
                 String afkServerName = PluginConfig.get().getString("afk-server-name", "");
-                playerPreviousServerMap.put(player, currentServerName);
+                playerPreviousServerMap.put(player.getUniqueId(), currentServerName);
                 player.connect(afkServerName);
                 player.sendMessage(Caption.of("notification.afk_disconnect"));
                 MessageBroadcaster.broadcastMessageToFiltered(
@@ -269,8 +268,8 @@ public abstract class AFKHandler {
                 LOGGER.info("Kicked {} for being AFK.", player.getName());
             }
             case TELEPORT -> {
-                playerPreviousLocationMap.put(player, player.getLocation());
-                playerPreviousGameModeMap.put(player, player.getGameMode());
+                playerPreviousLocationMap.put(player.getUniqueId(), player.getLocation());
+                playerPreviousGameModeMap.put(player.getUniqueId(), player.getGameMode());
                 player.updateGameMode(GameMode.SPECTATOR);
                 player.teleport(Location.getConfiguredAfkZone());
             }
@@ -280,14 +279,15 @@ public abstract class AFKHandler {
     public void revertPreviousState(@NotNull BAFKPlayer<?> player) {
         String afkServerName = PluginConfig.get().getString("afk-server-name", "");
         if (player.getCurrentServerName().equalsIgnoreCase(afkServerName)) {
-            player.connect(playerPreviousServerMap.getOrDefault(player, "lobby"));
+            player.connect(playerPreviousServerMap.getOrDefault(player.getUniqueId(), "lobby"));
+            playerPreviousServerMap.remove(player.getUniqueId());
         }
 
-        if (playerPreviousLocationMap.containsKey(player) && playerPreviousGameModeMap.containsKey(player)) {
-            player.teleport(playerPreviousLocationMap.get(player));
-            player.updateGameMode(playerPreviousGameModeMap.get(player));
-            playerPreviousLocationMap.remove(player);
-            playerPreviousGameModeMap.remove(player);
+        if (playerPreviousLocationMap.containsKey(player.getUniqueId()) && playerPreviousGameModeMap.containsKey(player.getUniqueId())) {
+            player.teleport(playerPreviousLocationMap.get(player.getUniqueId()));
+            player.updateGameMode(playerPreviousGameModeMap.get(player.getUniqueId()));
+            playerPreviousLocationMap.remove(player.getUniqueId());
+            playerPreviousGameModeMap.remove(player.getUniqueId());
         }
     }
 
@@ -309,7 +309,6 @@ public abstract class AFKHandler {
     public void handleJoin(@NotNull BAFKPlayer<?> player) {
         player.setTimeSinceLastAction(0);
         player.setAfkState(AFKState.ACTIVE);
-        fetchPreviousPlayerState(player);
         revertPreviousState(player);
     }
 
