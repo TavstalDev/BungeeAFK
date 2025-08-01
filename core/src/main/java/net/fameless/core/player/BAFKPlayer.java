@@ -42,9 +42,9 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
     }
 
     public static @NotNull Optional<BAFKPlayer<?>> of(String name) {
-        for (BAFKPlayer<?> battlePlayer : PLAYERS) {
-            if (battlePlayer.getName().equalsIgnoreCase(name)) {
-                return Optional.of(battlePlayer);
+        for (BAFKPlayer<?> bafkPlayer : PLAYERS) {
+            if (bafkPlayer.getName().equalsIgnoreCase(name)) {
+                return Optional.of(bafkPlayer);
             }
         }
         return Optional.empty();

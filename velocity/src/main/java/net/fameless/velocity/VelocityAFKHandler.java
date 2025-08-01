@@ -1,4 +1,4 @@
-package net.fameless.velocity;
+ package net.fameless.velocity;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
@@ -17,64 +17,69 @@ public class VelocityAFKHandler extends AFKHandler {
 
     @Override
     public void init() {
-        VelocityPlatform.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.create("bungee", "bungeeafk"));
-        VelocityPlatform.getProxy().getEventManager().register(VelocityPlatform.get(), this);
+        var proxy = VelocityPlatform.getProxy();
+        proxy.getChannelRegistrar().register(MinecraftChannelIdentifier.create("bungee", "bungeeafk"));
+        proxy.getEventManager().register(VelocityPlatform.get(), this);
     }
 
     @Subscribe
     public void onConnect(@NotNull ServerPostConnectEvent event) {
-        if (event.getPreviousServer() != null) return;
-        handleJoin(VelocityPlayer.adapt(event.getPlayer()));
+        if (event.getPreviousServer() == null) {
+            handleJoin(VelocityPlayer.adapt(event.getPlayer()));
+        }
     }
 
     @Subscribe
     public void onPluginMessage(@NotNull PluginMessageEvent event) {
         if (!event.getIdentifier().getId().equals("bungee:bungeeafk")) return;
-        String data = new String(event.getData());
-        String[] parts = data.split(";");
-        if (RequestType.ACTION_CAUGHT.matches(parts[0])) {
-            if (parts.length < 2) return;
-            try {
-                UUID playerUUID = UUID.fromString(parts[1]);
-                VelocityPlayer velocityPlayer = VelocityPlayer.adapt(playerUUID).orElse(null);
-                if (velocityPlayer == null) return;
-                velocityPlayer.setTimeSinceLastAction(0);
-                velocityPlayer.setAfkState(AFKState.ACTIVE);
-                BungeeAFK.getAFKHandler().handleAction(velocityPlayer);
-            } catch (Exception e) {
-                LOGGER.error("Invalid data received: {} stacktrace: {}", data, e.getMessage());
+
+        String[] parts = new String(event.getData()).split(";");
+        RequestType type = RequestType.fromString(parts[0]);
+
+        try {
+            switch (type) {
+                case ACTION_CAUGHT:
+                    if (parts.length < 2) return;
+                    handleActionCaught(parts[1]);
+                    break;
+                case GAMEMODE_CHANGE:
+                    if (parts.length < 3) return;
+                    handleGameModeChange(parts[1], parts[2]);
+                    break;
+                case LOCATION_CHANGE:
+                    if (parts.length < 8) return;
+                    handleLocationChange(parts);
+                    break;
             }
-            return;
+        } catch (Exception e) {
+            LOGGER.error("Invalid data received: {} stacktrace: {}", Arrays.toString(parts), e.getMessage());
         }
-        if (RequestType.GAMEMODE_CHANGE.matches(parts[0])) {
-            if (parts.length < 3) return;
-            try {
-                UUID playerUUID = UUID.fromString(parts[1]);
-                GameMode gameMode = GameMode.valueOf(parts[2].toUpperCase(Locale.ROOT));
-                VelocityPlayer velocityPlayer = VelocityPlayer.adapt(playerUUID).orElse(null);
-                if (velocityPlayer == null) return;
-                velocityPlayer.setGameMode(gameMode);
-            } catch (Exception e) {
-                LOGGER.error("Invalid game mode data received: {} stacktrace: {}", data, e.getMessage());
-            }
-            return;
-        }
-        if (RequestType.LOCATION_CHANGE.matches(parts[0])) {
-            if (parts.length < 8) return;
-            try {
-                UUID uuid = UUID.fromString(parts[1]);
-                String worldName = parts[2];
-                double x = Double.parseDouble(parts[3]);
-                double y = Double.parseDouble(parts[4]);
-                double z = Double.parseDouble(parts[5]);
-                float yaw = Float.parseFloat(parts[6]);
-                float pitch = Float.parseFloat(parts[7]);
-                VelocityPlayer velocityPlayer = VelocityPlayer.adapt(uuid).orElse(null);
-                if (velocityPlayer == null) return;
-                velocityPlayer.setLocation(new net.fameless.core.location.Location(worldName, x, y, z, pitch, yaw));
-            } catch (Exception e) {
-                LOGGER.error("Invalid location data received: {} stacktrace: {}", data, e.getMessage());
-            }
-        }
+    }
+
+    private void handleActionCaught(String uuidStr) {
+        VelocityPlayer velocityPlayer = VelocityPlayer.adapt(UUID.fromString(uuidStr)).orElse(null);
+        if (velocityPlayer == null) return;
+        velocityPlayer.setTimeSinceLastAction(0);
+        velocityPlayer.setAfkState(AFKState.ACTIVE);
+        BungeeAFK.getAFKHandler().handleAction(velocityPlayer);
+    }
+
+    private void handleGameModeChange(String uuidStr, String modeStr) {
+        VelocityPlayer velocityPlayer = VelocityPlayer.adapt(UUID.fromString(uuidStr)).orElse(null);
+        if (velocityPlayer == null) return;
+        GameMode gameMode = GameMode.valueOf(modeStr.toUpperCase(Locale.ROOT));
+        velocityPlayer.setGameMode(gameMode);
+    }
+
+    private void handleLocationChange(String @NotNull [] parts) {
+        VelocityPlayer velocityPlayer = VelocityPlayer.adapt(UUID.fromString(parts[1])).orElse(null);
+        if (velocityPlayer == null) return;
+        String worldName = parts[2];
+        double x = Double.parseDouble(parts[3]);
+        double y = Double.parseDouble(parts[4]);
+        double z = Double.parseDouble(parts[5]);
+        float yaw = Float.parseFloat(parts[6]);
+        float pitch = Float.parseFloat(parts[7]);
+        velocityPlayer.setLocation(new net.fameless.core.location.Location(worldName, x, y, z, pitch, yaw));
     }
 }

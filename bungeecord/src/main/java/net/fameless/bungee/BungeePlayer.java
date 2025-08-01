@@ -27,45 +27,31 @@ public class BungeePlayer extends BAFKPlayer<ProxiedPlayer> {
     }
 
     public static @NotNull Optional<BungeePlayer> adapt(@NotNull String name) {
-        for (BungeePlayer bungeePlayer : BUNGEE_PLAYERS) {
-            if (bungeePlayer.getName().equals(name)) {
-                return Optional.of(bungeePlayer);
-            }
-        }
-        return Optional.empty();
+        return BUNGEE_PLAYERS.stream()
+                .filter(bp -> bp.getName().equals(name))
+                .findFirst();
     }
 
     public static @NotNull Optional<BungeePlayer> adapt(@NotNull UUID uuid) {
-        for (BungeePlayer bungeePlayer : BUNGEE_PLAYERS) {
-            if (bungeePlayer.getUniqueId().equals(uuid)) {
-                return Optional.of(bungeePlayer);
-            }
-        }
-        return Optional.empty();
+        return BUNGEE_PLAYERS.stream()
+                .filter(bp -> bp.getUniqueId().equals(uuid))
+                .findFirst();
     }
 
-    public static @NotNull BungeePlayer adapt(@NotNull ProxiedPlayer object) {
-        for (BungeePlayer bungeePlayer : BUNGEE_PLAYERS) {
-            Optional<ProxiedPlayer> platformPlayerOptional = bungeePlayer.getPlatformPlayer();
-            if (platformPlayerOptional.isEmpty()) continue;
-
-            if (platformPlayerOptional.get().getUniqueId().equals(object.getUniqueId())) {
-                return bungeePlayer;
-            }
-        }
-        return new BungeePlayer(object);
+    public static @NotNull BungeePlayer adapt(@NotNull ProxiedPlayer player) {
+        return BUNGEE_PLAYERS.stream()
+                .filter(bp -> bp.getPlatformPlayer()
+                        .map(p -> p.getUniqueId().equals(player.getUniqueId()))
+                        .orElse(false))
+                .findFirst()
+                .orElseGet(() -> new BungeePlayer(player));
     }
 
-    public static @NotNull Optional<BungeePlayer> adapt(@NotNull BAFKPlayer<?> battlePlayer) {
-        Optional<?> playerOptional = battlePlayer.getPlatformPlayer();
-        if (playerOptional.isEmpty()) {
-            return Optional.empty();
-        }
-
-        if (playerOptional.get() instanceof ProxiedPlayer player) {
-            return Optional.of(BungeePlayer.adapt(player));
-        }
-        return Optional.empty();
+    public static @NotNull Optional<BungeePlayer> adapt(@NotNull BAFKPlayer<?> player) {
+        return player.getPlatformPlayer()
+                .filter(ProxiedPlayer.class::isInstance)
+                .map(ProxiedPlayer.class::cast)
+                .map(BungeePlayer::adapt);
     }
 
     @Override
@@ -75,20 +61,15 @@ public class BungeePlayer extends BAFKPlayer<ProxiedPlayer> {
 
     @Override
     public @NotNull String getName() {
-        if (this.name == null) {
-            Optional<ProxiedPlayer> platformPlayer = getPlatformPlayer();
-            if (platformPlayer.isEmpty()) {
-                return "N/A";
-            }
-            this.name = platformPlayer.get().getName();
-        }
-        return this.name;
+        if (this.name != null) return this.name;
+        return getPlatformPlayer().map(ProxiedPlayer::getName).orElse("N/A");
     }
 
     @Override
     public @NotNull Audience getAudience() {
-        Optional<ProxiedPlayer> platformPlayerOptional = getPlatformPlayer();
-        return platformPlayerOptional.map(proxiedPlayer -> BungeeUtil.BUNGEE_AUDIENCES.player(proxiedPlayer)).orElseGet(Audience::empty);
+        return getPlatformPlayer()
+                .map(BungeeUtil.BUNGEE_AUDIENCES::player)
+                .orElseGet(Audience::empty);
     }
 
     @Override
@@ -98,14 +79,13 @@ public class BungeePlayer extends BAFKPlayer<ProxiedPlayer> {
 
     @Override
     public boolean isOffline() {
-        Optional<ProxiedPlayer> platformPlayerOptional = getPlatformPlayer();
-        return platformPlayerOptional.isEmpty() || !platformPlayerOptional.get().isConnected();
+        return getPlatformPlayer().map(p -> !p.isConnected()).orElse(true);
     }
 
     @Override
     public void connect(String serverName) {
-        Optional<ProxiedPlayer> platformPlayer = getPlatformPlayer();
-        platformPlayer.ifPresent(player -> player.connect(BungeePlatform.get().getProxy().getServerInfo(serverName)));
+        getPlatformPlayer().ifPresent(player ->
+                player.connect(BungeePlatform.get().getProxy().getServerInfo(serverName)));
     }
 
     @Override
@@ -120,24 +100,20 @@ public class BungeePlayer extends BAFKPlayer<ProxiedPlayer> {
             LOGGER.info("PlayerKickEvent was cancelled for player: {}", getName());
             return;
         }
-
         player.disconnect(BungeeComponentSerializer.get().serialize(event.getReason()));
     }
 
     @Override
     public boolean hasPermission(@NotNull String permission) {
-        Optional<ProxiedPlayer> platformPlayerOptional = getPlatformPlayer();
-        return platformPlayerOptional.isPresent() && platformPlayerOptional.get().hasPermission(permission);
+        return getPlatformPlayer().map(p -> p.hasPermission(permission)).orElse(false);
     }
 
     @Override
     public String getCurrentServerName() {
         ProxiedPlayer player = getPlatformPlayer().orElse(null);
-        if (player == null) {
-            return "N/A";
-        }
-        Server playerServer = player.getServer();
-        return playerServer != null ? playerServer.getInfo().getName() : "N/A";
+        if (player == null) return "N/A";
+        Server server = player.getServer();
+        return server != null ? server.getInfo().getName() : "N/A";
     }
 
     @Override
@@ -147,7 +123,7 @@ public class BungeePlayer extends BAFKPlayer<ProxiedPlayer> {
             LOGGER.info("player is null, cannot set gamemode.");
             return;
         }
-        byte[] data = (RequestType.GAMEMODE_CHANGE.name().toLowerCase() + ";" +
+        byte[] data = (RequestType.GAMEMODE_CHANGE.getName() + ";" +
                 this.getUniqueId() + ";" +
                 gameMode.name()).getBytes();
         player.getServer().getInfo().sendData("bungee:bungeeafk", data);
@@ -160,8 +136,7 @@ public class BungeePlayer extends BAFKPlayer<ProxiedPlayer> {
             LOGGER.info("player is null, cannot teleport.");
             return;
         }
-
-        byte[] data = (RequestType.TELEPORT_PLAYER.name().toLowerCase() + ";" +
+        byte[] data = (RequestType.TELEPORT_PLAYER.getName() + ";" +
                 this.getUniqueId() + ";" +
                 location.getWorldName() + ";" +
                 location.getX() + ";" +

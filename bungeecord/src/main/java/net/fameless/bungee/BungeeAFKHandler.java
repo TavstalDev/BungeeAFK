@@ -30,8 +30,7 @@ public class BungeeAFKHandler extends AFKHandler implements Listener {
     }
 
     private void awaitConnectionAndHandleJoin(BungeePlayer bungeePlayer, int attempt) {
-        final int maxAttempts = 50; // 50 * 100 ms = 5 second timeout
-
+        final int maxAttempts = 50;
         BungeePlatform.get().getProxy().getScheduler().schedule(BungeePlatform.get(), () -> {
             Optional<ProxiedPlayer> playerOpt = bungeePlayer.getPlatformPlayer();
             if (playerOpt.isPresent() && playerOpt.get().getServer() != null) {
@@ -47,51 +46,53 @@ public class BungeeAFKHandler extends AFKHandler implements Listener {
     @EventHandler
     public void onPluginMessage(@NotNull PluginMessageEvent event) {
         if (!event.getTag().equals("bungee:bungeeafk")) return;
-        String data = new String(event.getData());
-        String[] parts = data.split(";");
-        if (RequestType.ACTION_CAUGHT.matches(parts[0])) {
-            if (parts.length != 2) return;
-            try {
-                UUID playerUUID = UUID.fromString(parts[1]);
-                BungeePlayer bungeePlayer = BungeePlayer.adapt(playerUUID).orElse(null);
-                if (bungeePlayer == null) return;
-                bungeePlayer.setTimeSinceLastAction(0);
-                bungeePlayer.setAfkState(AFKState.ACTIVE);
-                BungeeAFK.getAFKHandler().handleAction(bungeePlayer);
-            } catch (Exception e) {
-                LOGGER.error("Invalid data received: {} stacktrace: {}", data, e.getMessage());
+        String[] parts = new String(event.getData()).split(";");
+        RequestType type = RequestType.fromString(parts[0]);
+
+        try {
+            switch (type) {
+                case ACTION_CAUGHT:
+                    handleActionCaught(parts);
+                    break;
+                case GAMEMODE_CHANGE:
+                    handleGameModeChange(parts);
+                    break;
+                case LOCATION_CHANGE:
+                    handleLocationChange(parts);
+                    break;
             }
-            return;
+        } catch (Exception e) {
+            LOGGER.error("Invalid data received: {} stacktrace: {}", Arrays.toString(parts), e.getMessage());
         }
-        if (RequestType.GAMEMODE_CHANGE.matches(parts[0])) {
-            if (parts.length < 3) return;
-            try {
-                UUID playerUUID = UUID.fromString(parts[1]);
-                GameMode gameMode = GameMode.valueOf(parts[2].toUpperCase(Locale.ROOT));
-                BungeePlayer bungeePlayer = BungeePlayer.adapt(playerUUID).orElse(null);
-                if (bungeePlayer == null) return;
-                bungeePlayer.setGameMode(gameMode);
-            } catch (Exception e) {
-                LOGGER.error("Invalid game mode data received: {} stacktrace: {}", data, e.getMessage());
-            }
-            return;
-        }
-        if (RequestType.LOCATION_CHANGE.matches(parts[0])) {
-            if (parts.length < 8) return;
-            try {
-                UUID uuid = UUID.fromString(parts[1]);
-                String worldName = parts[2];
-                double x = Double.parseDouble(parts[3]);
-                double y = Double.parseDouble(parts[4]);
-                double z = Double.parseDouble(parts[5]);
-                float yaw = Float.parseFloat(parts[6]);
-                float pitch = Float.parseFloat(parts[7]);
-                BungeePlayer bungeePlayer = BungeePlayer.adapt(uuid).orElse(null);
-                if (bungeePlayer == null) return;
-                bungeePlayer.setLocation(new net.fameless.core.location.Location(worldName, x, y, z, pitch, yaw));
-            } catch (Exception e) {
-                LOGGER.error("Invalid location data received: {} stacktrace: {}", data, e.getMessage());
-            }
-        }
+    }
+
+    private void handleActionCaught(String @NotNull [] parts) {
+        if (parts.length != 2) return;
+        BungeePlayer bungeePlayer = BungeePlayer.adapt(UUID.fromString(parts[1])).orElse(null);
+        if (bungeePlayer == null) return;
+        bungeePlayer.setTimeSinceLastAction(0);
+        bungeePlayer.setAfkState(AFKState.ACTIVE);
+        BungeeAFK.getAFKHandler().handleAction(bungeePlayer);
+    }
+
+    private void handleGameModeChange(String @NotNull [] parts) {
+        if (parts.length < 3) return;
+        BungeePlayer bungeePlayer = BungeePlayer.adapt(UUID.fromString(parts[1])).orElse(null);
+        if (bungeePlayer == null) return;
+        GameMode gameMode = GameMode.valueOf(parts[2].toUpperCase(Locale.ROOT));
+        bungeePlayer.setGameMode(gameMode);
+    }
+
+    private void handleLocationChange(String @NotNull [] parts) {
+        if (parts.length < 8) return;
+        BungeePlayer bungeePlayer = BungeePlayer.adapt(UUID.fromString(parts[1])).orElse(null);
+        if (bungeePlayer == null) return;
+        String worldName = parts[2];
+        double x = Double.parseDouble(parts[3]);
+        double y = Double.parseDouble(parts[4]);
+        double z = Double.parseDouble(parts[5]);
+        float yaw = Float.parseFloat(parts[6]);
+        float pitch = Float.parseFloat(parts[7]);
+        bungeePlayer.setLocation(new net.fameless.core.location.Location(worldName, x, y, z, pitch, yaw));
     }
 }
