@@ -1,9 +1,9 @@
 rootProject.name = "BungeeAFK"
 
-include("Core", "Bungee", "Tracking", "Velocity", "Spigot")
+include("core", "bungeecord", "tracking", "velocity", "spigot")
 
-project(":Core").name = "bungeeafk-core"
-project(":Bungee").name = "bungeeafk-bungeecord"
-project(":Tracking").name = "bungeeafk-tracking"
-project(":Velocity").name = "bungeeafk-velocity"
-project(":Spigot").name = "bungeeafk-spigot"
+project(":core").name = "bungeeafk-core"
+project(":bungeecord").name = "bungeeafk-bungeecord"
+project(":tracking").name = "bungeeafk-tracking"
+project(":velocity").name = "bungeeafk-velocity"
+project(":spigot").name = "bungeeafk-spigot"

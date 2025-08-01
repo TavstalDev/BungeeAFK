@@ -1,0 +1,46 @@
+
+#  ██████╗ ██╗   ██╗███╗   ██╗ ██████╗ ███████╗███████╗ █████╗ ███████╗██╗  ██╗
+#  ██╔══██╗██║   ██║████╗  ██║██╔════╝ ██╔════╝██╔════╝██╔══██╗██╔════╝██║ ██╔╝
+#  ██████╔╝██║   ██║██╔██╗ ██║██║  ███╗█████╗  █████╗  ███████║█████╗  █████╔╝
+#  ██╔══██╗██║   ██║██║╚██╗██║██║   ██║██╔══╝  ██╔══╝  ██╔══██║██╔══╝  ██╔═██╗
+#  ██████╔╝╚██████╔╝██║ ╚████║╚██████╔╝███████╗███████╗██║  ██║██║     ██║  ██╗
+#  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝
+#  BungeeAFK - AFK detection plugin for BungeeCord, Velocity and Spigot by Fameless9
+
+# Language used for messages and notifications
+# Available languages: en, de
+lang: en
+
+# Delay after which the warning message is sent to the player (seconds) | Lang entry: "notification.afk_warning"
+# e.g., if set to 90, the player will receive a warning message after 1 minute and 30 seconds of inactivity
+warning-delay: 90
+
+# Delay after which a player is marked as AFK (seconds)
+# e.g., if set to 180, the player will be marked as AFK after 3 minutes of inactivity
+afk-delay: 180
+
+# Delay after which a player marked as AFK is connected to the AFK server (seconds)
+# e.g., if set to 420, the player will be connected to the AFK server or kicked after 7 minutes of inactivity
+action-delay: 420
+
+# Action to be performed after action delay is reached. Possible values: "kick", "connect", "nothing".
+# "kick" - player is kicked from the server
+# "connect" - player is connected to the server specified in the "afk-server-name" option
+# "teleport" - player is teleported to the afk-location as configured below
+# "nothing" - nothing happens
+action: "kick"
+
+# Server name to which the player is connected when the action is set to "connect"
+# !!! Only available for BungeeCord and Velocity !!!
+afk-server-name: "afk"
+
+# AFK Location configuration
+# If the action is set to "teleport", the player will be teleported to this location
+afk-location:
+  world: "world"  # World name where the AFK location is located
+  x: 0.0          # X coordinate of the AFK location
+  y: 100.0        # Y coordinate of the AFK location
+  z: 0.0          # Z coordinate of the AFK location
+
+# Whether to allow bypass of AFK detection for players with the "afk.bypass" permission
+allow-bypass: true

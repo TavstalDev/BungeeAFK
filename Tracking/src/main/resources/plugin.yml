@@ -1,8 +1,0 @@
-name: BungeeAFKTracking
-version: '2.1.1'
-main: net.fameless.bungeeAFKTracking.BungeeAFKTracking
-api-version: '1.21'
-prefix: BungeeAFK
-authors: [Fameless9]
-description: Tracking plugin needed for BungeeAFK
-website: https://github.com/Fameless9
