@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 @Plugin(
     id = "bungeeafk",
     name = "BungeeAFK-Velocity",
-    version = "2.1.1"
+    version = "2.2.0"
     ,description = "BungeeAFK for Velocity proxy"
     ,url = "https://github.com/Fameless9"
     ,authors = {"Fameless9"}
