@@ -10,6 +10,7 @@ import net.fameless.core.command.framework.CommandCaller;
 import net.fameless.core.config.PluginConfig;
 import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.handling.Action;
+import net.fameless.core.player.BAFKPlayer;
 import net.fameless.core.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.Tag;
@@ -170,6 +171,15 @@ public class MainCommand extends Command {
                             TagResolver.resolver("caption", Tag.inserting(Component.text(Caption.getString(language, captionKey))))
                     ));
                 }
+                case "afk-location" -> {
+                    if (!caller.callerType().equals(CallerType.PLAYER)) {
+                        caller.sendMessage(Caption.of("command.not_a_player"));
+                        return;
+                    }
+                    BAFKPlayer<?> player = (BAFKPlayer<?>) caller;
+                    PluginConfig.get().set("afk-location", player.getLocation().getAsMap());
+                    player.sendMessage(Caption.of("command.afk_location_set"));
+                }
                 case "reloadconfig" -> {
                     PluginConfig.reload();
                     afkHandler.fetchConfigValues();
@@ -210,7 +220,8 @@ public class MainCommand extends Command {
                         "caption",
                         "warning-delay",
                         "allow-bypass",
-                        "reloadconfig"
+                        "reloadconfig",
+                        "afk-location"
                 ));
             } else if (args[0].equalsIgnoreCase("lang")) {
                 completions.add("reload");

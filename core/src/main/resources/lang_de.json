@@ -35,6 +35,7 @@
   "command.bypass_set": "<prefix><green>Bypass erlauben wurde auf <allow> gesetzt.",
   "command.afk_bypass": "<prefix><gray>Du umgehst AFK-Checks und kannst deinen AFK-Status daher nicht ändern.",
   "command.language_changed": "<prefix><green>Sprache auf <language> gesetzt.",
+  "command.afk_location_set": "<prefix><green>AFK-Standort auf deine aktuelle Position gesetzt.",
   "error.no_caller_type": "<prefix><red>Falscher CallerType.",
   "actionbar.afk": "<blue>Du bist AFK"
 }

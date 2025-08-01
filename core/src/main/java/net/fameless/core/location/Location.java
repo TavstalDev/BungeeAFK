@@ -99,6 +99,17 @@ public class Location {
         return obj;
     }
 
+    public Map<String, Object> getAsMap() {
+        return Map.of(
+                "world", worldName,
+                "x", x,
+                "y", y,
+                "z", z,
+                "pitch", pitch,
+                "yaw", yaw
+        );
+    }
+
     @Override
     public String toString() {
         return getAsJsonObject().toString();
