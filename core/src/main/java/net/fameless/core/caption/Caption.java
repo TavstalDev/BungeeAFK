@@ -2,6 +2,7 @@ package net.fameless.core.caption;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fameless.core.util.PluginPaths;
 import net.fameless.core.util.ResourceUtil;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Map;
 
 public final class Caption {
 
@@ -61,6 +63,15 @@ public final class Caption {
                 jsonObject = GSON.fromJson(reader, JsonObject.class);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to load language file: " + langFile.getPath(), e);
+            }
+
+            JsonObject defaultJsonObject = ResourceUtil.readJsonResource("lang_" + language.getIdentifier() + ".json");
+            for (Map.Entry<String, JsonElement> entry : defaultJsonObject.entrySet()) {
+                String key = entry.getKey();
+                if (!jsonObject.has(key)) {
+                    jsonObject.add(key, entry.getValue());
+                    LOGGER.warn("Missing key '{}' in language '{}', adding default value.", key, language.getIdentifier());
+                }
             }
 
             loadLanguage(language, jsonObject);
