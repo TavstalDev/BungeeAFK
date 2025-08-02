@@ -27,6 +27,14 @@ jobs:
       with:
         gradle-version: '8.11'
 
+    - name: Clone BungeeCord
+      run: git clone https://github.com/SpigotMC/BungeeCord.git
+
+    - name: Build and install BungeeCord API
+      run: |
+        cd BungeeCord
+        ./gradlew install
+
     - name: Make Gradle Wrapper executable
       run: chmod +x ./gradlew
 
