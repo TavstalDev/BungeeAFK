@@ -1,12 +1,12 @@
 # BungeeAFK
 
-BungeeAFK is a cross-platform plugin for **BungeeCord**, **Velocity**, and **Spigot/Paper** servers that detects inactive (AFK) players. If a player is idle for a configurable amount of time, the plugin can either **kick them** or **move them to a separate AFK server** within your Bungee network.
+BungeeAFK is a cross-platform plugin for **BungeeCord**, **Velocity**, and **Spigot/Paper** servers that detects inactive (AFK) players. If a player is idle for a configurable amount of time, the plugin can either **kick them**, **teleport them** or **move them to a separate AFK server** within your Bungee network.
 
 ## ✨ Features
 
 - ⚙️ Fully configurable timeout and action
-- 🔀 Support for **kick** or **move-to-server** actions
-- 🌐 Works with BungeeCord, Velocity, and Spigot
+- 🔀 Support for **kick**, **teleport** or **move-to-server** actions
+- 🌐 Compatible with BungeeCord, Velocity and Spigot, as well as their forks.
 - 📦 Lightweight and easy to install
 - 🔗 Detects AFK via movement, chat, interaction, etc.
 
@@ -39,30 +39,40 @@ BungeeAFK-Tracking
 In the `config.yml`, you can customize:
 
 ```yaml
-# Available languages: English (en) & German (de)
+# Language used for messages and notifications
+# Available languages: en, de
 lang: en
 
 # Delay after which the warning message is sent to the player (seconds) | Lang entry: "notification.afk_warning"
-# e.g., if set to 300, the player will receive a warning message after 5 minutes of inactivity
-warning-delay: 300
+# e.g., if set to 90, the player will receive a warning message after 1 minute and 30 seconds of inactivity
+warning-delay: 90
 
 # Delay after which a player is marked as AFK (seconds)
-# e.g., if set to 600, the player will be marked as AFK after 10 minutes of inactivity
-afk-delay: 600
+# e.g., if set to 180, the player will be marked as AFK after 3 minutes of inactivity
+afk-delay: 180
 
 # Delay after which a player marked as AFK is connected to the AFK server (seconds)
-# e.g., if set to 630, the player will be connected to the AFK server or kicked after 10 minutes and 30 seconds of inactivity
-action-delay: 630
+# e.g., if set to 420, the player will be connected to the AFK server or kicked after 7 minutes of inactivity
+action-delay: 420
 
 # Action to be performed after action delay is reached. Possible values: "kick", "connect", "nothing".
 # "kick" - player is kicked from the server
 # "connect" - player is connected to the server specified in the "afk-server-name" option
+# "teleport" - player is teleported to the afk-location as configured below
 # "nothing" - nothing happens
 action: "kick"
 
 # Server name to which the player is connected when the action is set to "connect"
 # !!! Only available for BungeeCord and Velocity !!!
 afk-server-name: "afk"
+
+# AFK Location configuration
+# If the action is set to "teleport", the player will be teleported to this location
+afk-location:
+  world: "world"  # World name where the AFK location is located
+  x: 0.0          # X coordinate of the AFK location
+  y: 100.0        # Y coordinate of the AFK location
+  z: 0.0          # Z coordinate of the AFK location
 
 # Whether to allow bypass of AFK detection for players with the "afk.bypass" permission
 allow-bypass: true
@@ -98,7 +108,7 @@ Make sure the AFK server (`afk`) exists in your BungeeCord/Velocity `config.yml`
 ## 📣 Commands
 You can configure the plugin using the `/bungeeafk` or `/bafk` command.
 
-- `/bafk configure <action | action-delay | afk-delay | allow-bypass | warn-delay | caption | reloadconfig> <value>`
+- `/bafk configure <action | action-delay | afk-delay | allow-bypass | warn-delay | afk-location | caption | reloadconfig> <value>`
 - `/bafk lang <en | de | reload>`
 
 ---
