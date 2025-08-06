@@ -1,3 +1,5 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/fameless9/bungeeafk/badge)](https://www.codefactor.io/repository/github/fameless9/bungeeafk)
+
 # BungeeAFK
 
 BungeeAFK is a cross-platform plugin for **BungeeCord**, **Velocity**, and **Spigot/Paper** servers that detects inactive (AFK) players. If a player is idle for a configurable amount of time, the plugin can either **kick them**, **teleport them** or **move them to a separate AFK server** within your Bungee network.
