@@ -2,11 +2,14 @@ package net.fameless.bungee;
 
 import net.fameless.core.BungeeAFK;
 import net.fameless.core.BungeeAFKPlatform;
+import net.fameless.core.ServerEnvironment;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bstats.bungeecord.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public final class BungeePlatform extends Plugin implements BungeeAFKPlatform {
 
@@ -48,5 +51,15 @@ public final class BungeePlatform extends Plugin implements BungeeAFKPlatform {
     @Override
     public boolean doesServerExist(String serverName) {
         return getProxy().getServerInfo(serverName) != null;
+    }
+
+    @Override
+    public List<String> getServers() {
+        return getProxy().getServers().keySet().stream().toList();
+    }
+
+    @Override
+    public ServerEnvironment getServerEnvironment() {
+        return ServerEnvironment.PROXY;
     }
 }

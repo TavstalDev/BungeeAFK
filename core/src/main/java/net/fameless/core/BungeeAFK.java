@@ -81,6 +81,10 @@ public class BungeeAFK {
         }
     }
 
+    public static boolean isProxy() {
+        return platform.getServerEnvironment() == ServerEnvironment.PROXY;
+    }
+
     public static AFKHandler getAFKHandler() {
         return afkHandler;
     }

@@ -77,7 +77,9 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
     }
 
     public AFKState getAfkState() {
-        if (PluginConfig.get().getBoolean("allow-bypass") && hasPermission("bungeeafk.bypass")) {
+        if ((PluginConfig.get().getBoolean("allow-bypass") && hasPermission("bungeeafk.bypass")) ||
+                PluginConfig.get().getStringList("disabled-servers").contains(getCurrentServerName())
+        ) {
             return AFKState.BYPASS;
         }
         return afkState;
@@ -88,6 +90,8 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
 
         PlayerAFKStateChangeEvent event = new PlayerAFKStateChangeEvent(this, this.afkState, afkState);
         EventDispatcher.post(event);
+
+        if (event.getNewState() == this.afkState) return;
 
         if ((this.afkState == AFKState.AFK || this.afkState == AFKState.ACTION_TAKEN) && event.getNewState() == AFKState.ACTIVE) {
             sendMessage(Caption.of("notification.afk_return"));

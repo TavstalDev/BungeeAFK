@@ -8,14 +8,17 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.fameless.core.BungeeAFK;
 import net.fameless.core.BungeeAFKPlatform;
+import net.fameless.core.ServerEnvironment;
 import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 @Plugin(
     id = "bungeeafk",
     name = "BungeeAFK-Velocity",
-    version = "2.2.0"
+    version = "2.3.0"
     ,description = "BungeeAFK for Velocity proxy"
     ,url = "https://github.com/Fameless9"
     ,authors = {"Fameless9"}
@@ -66,5 +69,17 @@ public class VelocityPlatform implements BungeeAFKPlatform {
     @Override
     public boolean doesServerExist(String serverName) {
         return proxyServer.getServer(serverName).isPresent();
+    }
+
+    @Override
+    public List<String> getServers() {
+        return proxyServer.getAllServers().stream()
+                .map(server -> server.getServerInfo().getName())
+                .toList();
+    }
+
+    @Override
+    public ServerEnvironment getServerEnvironment() {
+        return ServerEnvironment.PROXY;
     }
 }
