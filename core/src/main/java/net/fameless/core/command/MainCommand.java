@@ -28,7 +28,7 @@ public class MainCommand extends Command {
                 "bungeeafk",
                 List.of("bafk"),
                 CallerType.NONE,
-                "/bungeeafk configure <afk-delay|action-delay|action> <delay|action>",
+                "/bungeeafk <lang|configure> <reload|<land>|allow-bypass|warning-delay|afk-delay|action-delay|action|caption|afk-location|reloadconfig|disable-server|enable-server|disabled-servers> <param>",
                 "bungeeafk.command"
         );
     }
@@ -273,6 +273,8 @@ public class MainCommand extends Command {
                     "command.language_changed",
                     TagResolver.resolver("language", Tag.inserting(Component.text(newLanguage.getFriendlyName())))
             ));
+        } else {
+            sendUsage(caller);
         }
     }
 
