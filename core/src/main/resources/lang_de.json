@@ -36,6 +36,13 @@
   "command.afk_bypass": "<prefix><gray>Du umgehst AFK-Checks und kannst deinen AFK-Status daher nicht ändern.",
   "command.language_changed": "<prefix><green>Sprache auf <language> gesetzt.",
   "command.afk_location_set": "<prefix><green>AFK-Standort auf deine aktuelle Position gesetzt.",
+  "command.server_already_disabled": "<prefix><red>Auf dem Server '<server>' ist die AFK-Detection bereits ausgesetzt.",
+  "command.server_disabled": "<prefix><green>Die AFK-Detection wurde auf dem Server '<server>' ausgesetzt.",
+  "command.server_already_enabled": "<prefix><red>Auf dem Server '<server>' ist die AFK-Detection bereits aktiviert.",
+  "command.server_enabled": "<prefix><green>Die AFK-Detection wurde auf dem Server '<server>' aktiviert.",
+  "command.server_not_found": "<prefix><red>Der Server '<server>' wurde nicht gefunden.",
+  "command.disabled_server_list": "<prefix><gray>Ausgesetzte Server: <servers>",
+  "command.only_proxy": "<prefix><red>Dieser Command kann nur auf dem Proxy (BungeeCord, Velocity, etc.) ausgeführt werden.",
   "error.no_caller_type": "<prefix><red>Falscher CallerType.",
   "actionbar.afk": "<blue>Du bist AFK"
 }

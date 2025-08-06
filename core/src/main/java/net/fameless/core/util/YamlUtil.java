@@ -54,6 +54,12 @@ public class YamlUtil {
 
             # Whether to allow bypass of AFK detection for players with the "afk.bypass" permission
             allow-bypass: %b
+
+            # List of servers where AFK detection is disabled
+            # Players on these servers will not be marked as AFK, and no actions will be performed
+            # Example: [lobby, hub]
+            disabled-servers:
+              %s
             """.formatted(
                 Caption.getCurrentLanguage().getIdentifier(),
                 PluginConfig.get().getInt("warning-delay", 60),
@@ -65,7 +71,8 @@ public class YamlUtil {
                 PluginConfig.get().getSection("afk-location").get("x"),
                 PluginConfig.get().getSection("afk-location").get("y"),
                 PluginConfig.get().getSection("afk-location").get("z"),
-                PluginConfig.get().getBoolean("allow-bypass", true)
+                PluginConfig.get().getBoolean("allow-bypass", true),
+                PluginConfig.get().getStringList("disabled-servers")
         );
     }
 
