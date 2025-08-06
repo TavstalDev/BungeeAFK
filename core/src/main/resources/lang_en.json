@@ -36,6 +36,13 @@
   "command.afk_bypass": "<prefix><gray>You are currently bypassing AFK checks and cannot toggle AFK status.",
   "command.language_changed": "<prefix><!bold><green>Language has been updated to <language>.",
   "command.afk_location_set": "<prefix><green>AFK location set to your current position.",
+  "command.server_already_disabled": "<prefix><red>The AFK detection is already disabled on the server '<server>'.",
+  "command.server_disabled": "<prefix><green>The AFK detection has been disabled on the server '<server>'.",
+  "command.server_already_enabled": "<prefix><red>The AFK detection is already enabled on the server '<server>'.",
+  "command.server_enabled": "<prefix><green>The AFK detection has been enabled on the server '<server>'.",
+  "command.server_not_found": "<prefix><red>The server '<server>' was not found.",
+  "command.disabled_server_list": "<prefix><gray>Excluded servers: <servers>",
+  "command.only_proxy": "<prefix><red>This command may only be executed on a proxy (BungeeCord, Velocity, etc.).",
   "error.no_caller_type": "<prefix><red>Invalid CallerType.",
   "actionbar.afk": "<blue>You are AFK"
 }

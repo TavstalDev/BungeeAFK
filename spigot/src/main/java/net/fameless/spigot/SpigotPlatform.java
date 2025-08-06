@@ -2,11 +2,17 @@ package net.fameless.spigot;
 
 import net.fameless.core.BungeeAFK;
 import net.fameless.core.BungeeAFKPlatform;
+import net.fameless.core.ServerEnvironment;
 import net.fameless.core.handling.Action;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public final class SpigotPlatform extends JavaPlugin implements BungeeAFKPlatform {
 
@@ -45,5 +51,16 @@ public final class SpigotPlatform extends JavaPlugin implements BungeeAFKPlatfor
     @Override
     public boolean doesServerExist(String serverName) {
         return false;
+    }
+
+    @Contract(pure = true)
+    @Override
+    public @NotNull @Unmodifiable List<String> getServers() {
+        return List.of();
+    }
+
+    @Override
+    public ServerEnvironment getServerEnvironment() {
+        return ServerEnvironment.SERVER;
     }
 }

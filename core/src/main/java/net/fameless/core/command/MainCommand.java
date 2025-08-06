@@ -131,6 +131,11 @@ public class MainCommand extends Command {
                         return;
                     }
 
+                    if (action == Action.CONNECT && !BungeeAFK.isProxy()) {
+                        caller.sendMessage(Caption.of("notification.action_unavailable"));
+                        return;
+                    }
+
                     if (action == Action.CONNECT && !Action.isAfkServerConfigured()) {
                         caller.sendMessage(Caption.of("command.action_not_configured"));
                         return;
@@ -185,6 +190,71 @@ public class MainCommand extends Command {
                     afkHandler.fetchConfigValues();
                     caller.sendMessage(Caption.of("command.config_reloaded"));
                 }
+                case "disable-server" -> {
+                    if (!BungeeAFK.isProxy()) {
+                        caller.sendMessage(Caption.of("command.only_proxy"));
+                        return;
+                    }
+                    if (args.length < 3) {
+                        sendUsage(caller);
+                        return;
+                    }
+
+                    String serverName = args[2];
+                    List<String> disabledServers = PluginConfig.get().getStringList("disabled-servers");
+
+                    if (!BungeeAFK.getPlatform().doesServerExist(serverName)) {
+                        caller.sendMessage(Caption.of("command.server_not_found", TagResolver.resolver("server", Tag.inserting(Component.text(serverName)))));
+                        return;
+                    }
+
+                    if (disabledServers.contains(serverName)) {
+                        caller.sendMessage(Caption.of("command.server_already_disabled", TagResolver.resolver("server", Tag.inserting(Component.text(serverName)))));
+                        return;
+                    }
+                    disabledServers.add(serverName);
+                    PluginConfig.get().set("disabled-servers", disabledServers);
+                    caller.sendMessage(Caption.of("command.server_disabled",
+                            TagResolver.resolver("server", Tag.inserting(Component.text(serverName)))
+                    ));
+                }
+                case "enable-server" -> {
+                    if (!BungeeAFK.isProxy()) {
+                        caller.sendMessage(Caption.of("command.only_proxy"));
+                        return;
+                    }
+                    if (args.length < 3) {
+                        sendUsage(caller);
+                        return;
+                    }
+                    String serverName = args[2];
+
+                    if (!BungeeAFK.getPlatform().doesServerExist(serverName)) {
+                        caller.sendMessage(Caption.of("command.server_not_found", TagResolver.resolver("server", Tag.inserting(Component.text(serverName)))));
+                        return;
+                    }
+
+                    List<String> disabledServers = PluginConfig.get().getStringList("disabled-servers");
+                    if (!disabledServers.contains(serverName)) {
+                        caller.sendMessage(Caption.of("command.server_already_enabled", TagResolver.resolver("server", Tag.inserting(Component.text(serverName)))));
+                        return;
+                    }
+                    disabledServers.remove(serverName);
+                    PluginConfig.get().set("disabled-servers", disabledServers);
+                    caller.sendMessage(Caption.of("command.server_enabled",
+                            TagResolver.resolver("server", Tag.inserting(Component.text(serverName)))
+                    ));
+                }
+                case "disabled-servers" -> {
+                    if (!BungeeAFK.isProxy()) {
+                        caller.sendMessage(Caption.of("command.only_proxy"));
+                        return;
+                    }
+
+                    caller.sendMessage(Caption.of("command.disabled_server_list",
+                            TagResolver.resolver("servers", Tag.inserting(Component.text(String.join(", ", PluginConfig.get().getStringList("disabled-servers")))))
+                    ));
+                }
             }
         } else if (args[0].equalsIgnoreCase("lang")) {
             if (args[1].equalsIgnoreCase("reload")) {
@@ -223,6 +293,11 @@ public class MainCommand extends Command {
                         "reloadconfig",
                         "afk-location"
                 ));
+                if (BungeeAFK.isProxy()) {
+                    completions.add("disable-server");
+                    completions.add("enable-server");
+                    completions.add("disabled-servers");
+                }
             } else if (args[0].equalsIgnoreCase("lang")) {
                 completions.add("reload");
                 for (Language language : Language.values()) {
@@ -245,6 +320,12 @@ public class MainCommand extends Command {
                     }
                 } else if (args[1].equalsIgnoreCase("allow-bypass")) {
                     completions.addAll(Arrays.asList("true", "false"));
+                } else if (args[1].equalsIgnoreCase("disable-server") && BungeeAFK.isProxy()) {
+                    List<String> serverNames = new ArrayList<>(BungeeAFK.getPlatform().getServers());
+                    serverNames.removeAll(PluginConfig.get().getStringList("disabled-servers"));
+                    completions.addAll(serverNames);
+                } else if (args[1].equalsIgnoreCase("enable-server") && BungeeAFK.isProxy()) {
+                    completions.addAll(PluginConfig.get().getStringList("disabled-servers"));
                 }
             }
         } else if (args.length == 4) {
