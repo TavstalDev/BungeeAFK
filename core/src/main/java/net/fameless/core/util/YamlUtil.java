@@ -4,6 +4,8 @@ import net.fameless.core.caption.Caption;
 import net.fameless.core.config.PluginConfig;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
 public class YamlUtil {
 
     public static @NotNull String generateConfig() {
@@ -52,7 +54,7 @@ public class YamlUtil {
               y: %s
               z: %s
 
-            # Whether to allow bypass of AFK detection for players with the "afk.bypass" permission
+            # Whether to allow bypass of AFK detection for players with the "afk.bypass" permission (global)
             allow-bypass: %b
 
             # List of servers where AFK detection is disabled
@@ -60,6 +62,12 @@ public class YamlUtil {
             # Example: [lobby, hub]
             disabled-servers:
               %s
+
+            # Map of regions where AFK detection can be toggled on or off independently
+            # Players in regions where AFK detection is false will not be marked as AFK, and no actions will be performed
+            # Regions should be added using the /bafk region add <param> command
+            # Manually adding regions here is possible, but not recommended, unless you know what you're doing
+            %s
             """.formatted(
                 Caption.getCurrentLanguage().getIdentifier(),
                 PluginConfig.get().getInt("warning-delay", 60),
@@ -72,7 +80,8 @@ public class YamlUtil {
                 PluginConfig.get().getSection("afk-location").get("y"),
                 PluginConfig.get().getSection("afk-location").get("z"),
                 PluginConfig.get().getBoolean("allow-bypass", true),
-                PluginConfig.get().getStringList("disabled-servers")
+                PluginConfig.get().getStringList("disabled-servers"),
+                PluginConfig.YAML.dumpAsMap(Map.of("bypass-regions", PluginConfig.get().getSection("bypass-regions")))
         );
     }
 

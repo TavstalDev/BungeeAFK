@@ -42,7 +42,7 @@ afk-location:
   y: 100.0        # Y coordinate of the AFK location
   z: 0.0          # Z coordinate of the AFK location
 
-# Whether to allow bypass of AFK detection for players with the "afk.bypass" permission
+# Whether to allow bypass of AFK detection for players with the "afk.bypass" permission (global)
 allow-bypass: true
 
 # List of servers where AFK detection is disabled
@@ -50,3 +50,9 @@ allow-bypass: true
 # Example: [lobby, hub]
 disabled-servers:
   []
+
+# Map of regions where AFK detection can be toggled on or off independently
+# Players in regions where AFK detection is false will not be marked as AFK, and no actions will be performed
+# Regions should be added using the /bafk region add <param> command
+# Manually adding regions here is possible, but not recommended, unless you know what you're doing
+bypass-regions:
