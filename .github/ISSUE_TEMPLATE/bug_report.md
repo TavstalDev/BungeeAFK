@@ -36,3 +36,4 @@ Add any other context about the problem here.
 **Before Sending**
 - [ ] BungeeAFK Tracking is installed on all subservers.
 - [ ] I do not use a forked version.
+- [ ] I use the latest BungeeAFK version.
