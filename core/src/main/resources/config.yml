@@ -68,7 +68,7 @@ auto-clicker:
   allow-bypass: true
 
   # Players with this permission will receive a notification that an autoclicker has been detected
-  notify-permission: "bungeeafk.autoclicker.notify"
+  notify-permission: "bungeeafk.auto-clicker.notify"
 
   # Whether to notify the player when an auto clicker is detected for them
   notify-player: true

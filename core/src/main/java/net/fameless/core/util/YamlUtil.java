@@ -153,7 +153,7 @@ public class YamlUtil {
                 PluginConfig.YAML.dumpAsMap(Map.of("bypass-regions", PluginConfig.get().getSection("bypass-regions"))),
                 PluginConfig.get().getBoolean("auto-clicker.enabled", true),
                 PluginConfig.get().getBoolean("auto-clicker.allow-bypass", true),
-                PluginConfig.get().getString("auto-clicker.notify-permission", "bungeeafk.autoclicker.notify"),
+                PluginConfig.get().getString("auto-clicker.notify-permission", "bungeeafk.auto-clicker.notify"),
                 PluginConfig.get().getBoolean("auto-clicker.notify-player", true),
                 PluginConfig.get().getString("auto-clicker.action", "open-inv"),
                 PluginConfig.get().getInt("auto-clicker.detection-history-size", 10),

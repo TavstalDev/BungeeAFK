@@ -1,7 +1,6 @@
 {
   "prefix": "<blue><bold>BungeeAFK <!bold><dark_gray>» ",
   "notification.afk_warning": "<prefix><red>You haven't moved in a while. Show the server that you are still there by moving briefly.",
-  "notification.afk": "<prefix><red>You're now marked as AFK. You will be connected to the AFK server in <action-delay>.",
   "notification.afk_broadcast": "<prefix><gray><player> is now AFK.",
   "notification.afk_disconnect": "<prefix><red>You have been connected to the AFK server.",
   "notification.afk_disconnect_broadcast": "<prefix><gray><player> has been connected to the AFK-Server.",
