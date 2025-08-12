@@ -129,7 +129,7 @@ public class YamlUtil {
               # List of servers where movement pattern detection is disabled
               disabled-servers:
                 %s
-            
+
               # Time after which an individual movement is cleared and therefore cannot be used for analyzing patterns
               # This is to prevent high memory usage and to ensure that only recent movements are considered
               # If set to 600, movements older than 10 minutes will not be considered for pattern detection

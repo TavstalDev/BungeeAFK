@@ -17,6 +17,7 @@ import net.fameless.core.location.Location;
 import net.fameless.core.player.BAFKPlayer;
 import net.fameless.core.region.MockRegion;
 import net.fameless.core.region.Region;
+import net.fameless.core.util.PluginUpdater;
 import net.fameless.core.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.Tag;
@@ -41,9 +42,18 @@ public class MainCommand extends Command {
 
     @Override
     protected void executeCommand(CommandCaller caller, String @NotNull [] args) {
-        if (args.length < 2) return;
+        if (args.length < 1) {
+            sendUsage(caller);
+            return;
+        }
         if (args[0].equalsIgnoreCase("help")) {
-            caller.sendMessage(Caption.of("command.help"));
+            caller.sendMessage(Caption.of("command.help",
+                    TagResolver.resolver("version", Tag.inserting(Component.text(PluginUpdater.CURRENT_VERSION))))
+            );
+            return;
+        }
+        if (args.length < 2) {
+            sendUsage(caller);
             return;
         }
         if (args[0].equalsIgnoreCase("configure")) {

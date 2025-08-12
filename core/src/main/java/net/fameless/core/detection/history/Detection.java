@@ -1,7 +1,6 @@
 package net.fameless.core.detection.history;
 
 import com.google.gson.JsonObject;
-import net.fameless.core.config.PluginConfig;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;

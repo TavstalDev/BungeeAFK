@@ -23,7 +23,7 @@
   "notification.movement_pattern_connect_message": "<prefix><red>You have been connected to the AFK server due to a suspicious movement pattern.",
   "notification.movement_pattern_teleport_message": "<prefix><gray>You have been teleported to the AFK location due to a suspicious movement pattern.",
   "permission.no_permission": "<prefix><red>Insufficient permission: <permission>.",
-  "command.help": "<prefix><gray>For help with the plugin, visit the official <blue><u><click:open_url:'https://fameless9.github.io/BungeeAFK'>BungeeAFK Documentation</click></u></blue> page.",
+  "command.help": "<prefix><gray>For help with the plugin, visit the official <blue><u><click:open_url:'https://fameless9.github.io/BungeeAFK'>BungeeAFK Documentation</click></u></blue> page. <green>Running BungeeAFK version <version><gray>.",
   "command.usage": "<prefix><red>Usage: <usage>.",
   "command.console_command": "<prefix><red>This Command may only be used inside the console.",
   "command.not_a_player": "<prefix><red>Only players may use this Command.",
