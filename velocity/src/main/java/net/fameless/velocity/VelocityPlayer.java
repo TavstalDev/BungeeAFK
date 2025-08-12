@@ -4,9 +4,10 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import net.fameless.api.event.EventDispatcher;
+import net.fameless.api.event.PlayerKickEvent;
+import net.fameless.core.adapter.APIAdapter;
 import net.fameless.core.command.framework.CallerType;
-import net.fameless.core.event.EventDispatcher;
-import net.fameless.core.event.PlayerKickEvent;
 import net.fameless.core.location.Location;
 import net.fameless.core.messaging.RequestType;
 import net.fameless.core.player.BAFKPlayer;
@@ -86,7 +87,7 @@ public class VelocityPlayer extends BAFKPlayer<Player> {
         Player player = getPlatformPlayer().orElse(null);
         if (player == null) return;
 
-        PlayerKickEvent event = new PlayerKickEvent(this, reason);
+        PlayerKickEvent event = new PlayerKickEvent(APIAdapter.adapt(this), reason);
         EventDispatcher.post(event);
 
         if (event.isCancelled()) {

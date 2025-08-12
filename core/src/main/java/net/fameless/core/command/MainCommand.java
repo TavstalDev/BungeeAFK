@@ -219,10 +219,7 @@ public class MainCommand extends Command {
                     player.sendMessage(Caption.of("command.afk_location_set"));
                 }
                 case "reloadconfig" -> {
-                    PluginConfig.reload();
-                    afkHandler.fetchConfigValues();
-                    BungeeAFK.getAutoClickerDetector().reloadConfigValues();
-                    BungeeAFK.getMovementPatternDetection().reloadConfigValues();
+                    PluginConfig.reloadAll();
                     caller.sendMessage(Caption.of("command.config_reloaded"));
                 }
                 case "saveconfig" -> {

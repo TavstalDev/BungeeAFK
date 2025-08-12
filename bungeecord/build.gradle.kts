@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     implementation(project(":bungeeafk-core"))
+    implementation(project(":bungeeafk-api"))
     compileOnly(libs.bungee)
     compileOnly(libs.annotations)
     implementation(libs.guice)

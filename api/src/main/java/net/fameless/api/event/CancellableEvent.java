@@ -1,4 +1,4 @@
-package net.fameless.core.event;
+package net.fameless.api.event;
 
 public interface CancellableEvent {
 

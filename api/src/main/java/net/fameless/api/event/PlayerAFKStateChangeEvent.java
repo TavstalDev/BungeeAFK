@@ -1,7 +1,7 @@
-package net.fameless.core.event;
+package net.fameless.api.event;
 
-import net.fameless.core.handling.AFKState;
-import net.fameless.core.player.BAFKPlayer;
+import net.fameless.api.model.AFKState;
+import net.fameless.api.model.Player;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -9,11 +9,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public class PlayerAFKStateChangeEvent {
 
-    private final BAFKPlayer<?> player;
+    private final Player player;
     private final AFKState oldState;
     private AFKState newState;
 
-    public PlayerAFKStateChangeEvent(BAFKPlayer<?> player, AFKState oldState, AFKState newState) {
+    public PlayerAFKStateChangeEvent(Player player, AFKState oldState, AFKState newState) {
         this.player = player;
         this.oldState = oldState;
         this.newState = newState;
@@ -24,7 +24,7 @@ public class PlayerAFKStateChangeEvent {
      *
      * @return the player
      */
-    public BAFKPlayer<?> getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 

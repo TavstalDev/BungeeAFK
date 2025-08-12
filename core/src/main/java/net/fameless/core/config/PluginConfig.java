@@ -1,5 +1,6 @@
 package net.fameless.core.config;
 
+import net.fameless.core.BungeeAFK;
 import net.fameless.core.region.Region;
 import net.fameless.core.util.PluginPaths;
 import net.fameless.core.util.ResourceUtil;
@@ -22,7 +23,6 @@ public class PluginConfig {
     public static Yaml YAML;
     private static YamlConfig config;
 
-    @SuppressWarnings("unchecked")
     public static void init() {
         LOGGER.info("Loading configuration...");
         File configFile = PluginPaths.getConfigFile();
@@ -68,6 +68,14 @@ public class PluginConfig {
 
     public static void reload() {
         init();
+    }
+
+    public static void reloadAll() {
+        LOGGER.info("Reloading all configurations...");
+        PluginConfig.reload();
+        BungeeAFK.getAFKHandler().fetchConfigValues();
+        BungeeAFK.getAutoClickerDetector().reloadConfigValues();
+        BungeeAFK.getMovementPatternDetection().reloadConfigValues();
     }
 
     public static void shutdown() {

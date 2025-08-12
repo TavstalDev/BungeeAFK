@@ -12,6 +12,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":bungeeafk-api"))
     compileOnly(libs.annotations)
     implementation(libs.gson)
     implementation(libs.guice)
