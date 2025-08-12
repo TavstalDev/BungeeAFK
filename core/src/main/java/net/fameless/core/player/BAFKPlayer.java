@@ -1,5 +1,6 @@
 package net.fameless.core.player;
 
+import net.fameless.core.BungeeAFK;
 import net.fameless.core.caption.Caption;
 import net.fameless.core.command.framework.CommandCaller;
 import net.fameless.core.config.PluginConfig;
@@ -7,6 +8,7 @@ import net.fameless.core.event.EventDispatcher;
 import net.fameless.core.event.PlayerAFKStateChangeEvent;
 import net.fameless.core.handling.AFKState;
 import net.fameless.core.location.Location;
+import net.fameless.core.region.Region;
 import net.fameless.core.util.PlayerFilters;
 import net.fameless.core.util.MessageBroadcaster;
 import net.kyori.adventure.audience.Audience;
@@ -78,7 +80,8 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
 
     public AFKState getAfkState() {
         if ((PluginConfig.get().getBoolean("allow-bypass") && hasPermission("bungeeafk.bypass")) ||
-                PluginConfig.get().getStringList("disabled-servers").contains(getCurrentServerName())
+                PluginConfig.get().getStringList("disabled-servers").contains(getCurrentServerName()) ||
+                Region.isLocationInAnyBypassRegion(location)
         ) {
             return AFKState.BYPASS;
         }
@@ -97,8 +100,8 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
             sendMessage(Caption.of("notification.afk_return"));
             MessageBroadcaster.broadcastMessageToFiltered(
                     Caption.of("notification.afk_return_broadcast",
-                    TagResolver.resolver("player", Tag.inserting(Component.text(getName())))),
-                    PlayerFilters.matches(this).negate()
+                            TagResolver.resolver("player", Tag.inserting(Component.text(getName())))),
+                    PlayerFilters.notMatching(this)
             );
         }
         this.afkState = event.getNewState();
@@ -129,8 +132,12 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
     }
 
     public void setLocation(Location location) {
+        if (!this.location.equalsBlock(location)) {
+            BungeeAFK.getMovementPatternDetection().registerMovement(this, location);
+        }
         this.location = location;
     }
+
 
     public abstract String getName();
 
@@ -151,4 +158,6 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
     public abstract void updateGameMode(GameMode gameMode);
 
     public abstract void teleport(Location location);
+
+    public abstract void openEmptyInventory();
 }

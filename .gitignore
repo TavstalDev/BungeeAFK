@@ -133,7 +133,6 @@ classes/
 *.bat
 
 # Other
-docs/
 build/
 
 .DS_Store

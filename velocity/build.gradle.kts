@@ -13,13 +13,13 @@ dependencies {
     implementation(project(":bungeeafk-core"))
     compileOnly(libs.velocity)
     implementation(libs.annotations)
-    implementation(libs.snakeYamlEnginge)
+    implementation(libs.snakeYaml)
     implementation(libs.adventureTextMinimessage)
     implementation(libs.bstatsVelocity)
 }
 
 group = "net.fameless"
-version = "2.3.0"
+version = "2.4.0"
 description = "BungeeAFK for Velocity proxies"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
@@ -31,7 +31,7 @@ tasks {
     shadowJar {
         archiveBaseName.set("BungeeAFK-Velocity")
         archiveClassifier.set("")
-        archiveVersion.set("2.3.0")
+        archiveVersion.set("2.4.0")
 
         relocate("org.bstats", "net.fameless.bungeeafk.bstats")
     }

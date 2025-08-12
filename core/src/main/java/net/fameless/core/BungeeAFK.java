@@ -8,24 +8,44 @@ import net.fameless.core.caption.Caption;
 import net.fameless.core.caption.Language;
 import net.fameless.core.command.framework.Command;
 import net.fameless.core.config.PluginConfig;
+import net.fameless.core.detection.autoclicker.AutoClickerDetector;
+import net.fameless.core.detection.history.DetectionHistoryManager;
+import net.fameless.core.detection.movementpattern.MovementPatternDetection;
 import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.handling.Action;
-import net.fameless.core.location.Location;
+import net.fameless.core.util.ColorUtil;
 import net.fameless.core.util.PluginUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 public class BungeeAFK {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + BungeeAFK.class.getSimpleName());
+    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private static boolean initialized = false;
     private static BungeeAFKPlatform platform;
     private static AFKHandler afkHandler;
+    private static AutoClickerDetector autoClickerDetector;
+    private static MovementPatternDetection movementPatternDetection;
 
     public static synchronized void initCore(AbstractModule platformModule) {
         if (initialized) {
             throw new RuntimeException("You may not initialize another instance of BungeeAFK Core.");
         }
+        String startupMessage = ColorUtil.ANSI_CYAN + """
+
+                ██████╗ ██╗   ██╗███╗   ██╗ ██████╗ ███████╗███████╗ █████╗ ███████╗██╗  ██╗
+                ██╔══██╗██║   ██║████╗  ██║██╔════╝ ██╔════╝██╔════╝██╔══██╗██╔════╝██║ ██╔╝
+                ██████╔╝██║   ██║██╔██╗ ██║██║  ███╗█████╗  █████╗  ███████║█████╗  █████╔╝
+                ██╔══██╗██║   ██║██║╚██╗██║██║   ██║██╔══╝  ██╔══╝  ██╔══██║██╔══╝  ██╔═██╗
+                ██████╔╝╚██████╔╝██║ ╚████║╚██████╔╝███████╗███████╗██║  ██║██║     ██║  ██╗
+                ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝
+                """ + ColorUtil.ANSI_GREEN + "Running BungeeAFK Version: %s".formatted(PluginUpdater.CURRENT_VERSION + ColorUtil.ANSI_RESET);
+        LOGGER.info(startupMessage);
+
         LOGGER.info("Initializing Core...");
 
         Injector injector = Guice.createInjector(
@@ -34,11 +54,13 @@ public class BungeeAFK {
         );
 
         PluginConfig.init();
-        LOGGER.info("Configured AFK-Location: {}", Location.getConfiguredAfkZone());
         PluginUpdater.runTask();
 
         platform = injector.getInstance(BungeeAFKPlatform.class);
         afkHandler = injector.getInstance(AFKHandler.class);
+        autoClickerDetector = new AutoClickerDetector();
+        movementPatternDetection = new MovementPatternDetection();
+        DetectionHistoryManager.loadDetections();
 
         checkForMisconfiguration();
 
@@ -57,6 +79,7 @@ public class BungeeAFK {
     public static void handleShutdown() {
         if (!initialized) return;
         Caption.saveToFile();
+        DetectionHistoryManager.saveDetections();
         PluginConfig.shutdown();
         afkHandler.shutdown();
     }
@@ -91,5 +114,17 @@ public class BungeeAFK {
 
     public static BungeeAFKPlatform getPlatform() {
         return platform;
+    }
+
+    public static AutoClickerDetector getAutoClickerDetector() {
+        return autoClickerDetector;
+    }
+
+    public static MovementPatternDetection getMovementPatternDetection() {
+        return movementPatternDetection;
+    }
+
+    public static ScheduledExecutorService getScheduler() {
+        return scheduler;
     }
 }
