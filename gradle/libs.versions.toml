@@ -1,7 +1,7 @@
 [versions]
 bungee = "1.21-R0.1-SNAPSHOT"
 spigot = "1.21.4-R0.1-SNAPSHOT"
-velocity = "3.0.0"
+velocity = "3.4.0-SNAPSHOT"
 gson = "2.11.0"
 guice = "7.0.0"
 annotations = "26.0.1"
