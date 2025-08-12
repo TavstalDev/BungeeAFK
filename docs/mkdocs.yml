@@ -1,0 +1,26 @@
+site_name: BungeeAFK Documentation
+site_description: Documentation for BungeeAFK, a plugin for managing AFK players in Minecraft
+site_author: Fameless9
+theme:
+  name: material
+  locale: en
+
+repo_name: BungeeAFK
+repo_url: https://github.com/Fameless9/BungeeAFK
+remote_name: origin
+remote_branch: gh-pages
+
+nav:
+  - Home: index.md
+  - Installation:
+    - Installation Guide: installation.md
+    - Compatibility: compatibility.md
+    - Updating: updating.md
+  - Configuration:
+    - Configuration Guide: configuration.md
+    - Custom Messages: custom_messages.md
+  - Commands: commands.md
+  - Support:
+      - Issue Reporting: issue_reporting.md
+      - Feature Requests: feature_requests.md
+      - Reviews: reviewing.md
