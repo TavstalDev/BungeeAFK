@@ -13,7 +13,7 @@ import net.fameless.core.detection.history.DetectionHistoryManager;
 import net.fameless.core.detection.movementpattern.MovementPatternDetection;
 import net.fameless.core.handling.AFKHandler;
 import net.fameless.core.handling.Action;
-import net.fameless.core.location.Location;
+import net.fameless.core.util.ColorUtil;
 import net.fameless.core.util.PluginUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +35,17 @@ public class BungeeAFK {
         if (initialized) {
             throw new RuntimeException("You may not initialize another instance of BungeeAFK Core.");
         }
+        String startupMessage = ColorUtil.ANSI_CYAN + """
+
+                ██████╗ ██╗   ██╗███╗   ██╗ ██████╗ ███████╗███████╗ █████╗ ███████╗██╗  ██╗
+                ██╔══██╗██║   ██║████╗  ██║██╔════╝ ██╔════╝██╔════╝██╔══██╗██╔════╝██║ ██╔╝
+                ██████╔╝██║   ██║██╔██╗ ██║██║  ███╗█████╗  █████╗  ███████║█████╗  █████╔╝
+                ██╔══██╗██║   ██║██║╚██╗██║██║   ██║██╔══╝  ██╔══╝  ██╔══██║██╔══╝  ██╔═██╗
+                ██████╔╝╚██████╔╝██║ ╚████║╚██████╔╝███████╗███████╗██║  ██║██║     ██║  ██╗
+                ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝
+                """ + ColorUtil.ANSI_GREEN + "Running BungeeAFK Version: %s".formatted(PluginUpdater.CURRENT_VERSION + ColorUtil.ANSI_RESET);
+        LOGGER.info(startupMessage);
+
         LOGGER.info("Initializing Core...");
 
         Injector injector = Guice.createInjector(
@@ -43,7 +54,6 @@ public class BungeeAFK {
         );
 
         PluginConfig.init();
-        LOGGER.info("Configured AFK-Location: {}", Location.getConfiguredAfkZone());
         PluginUpdater.runTask();
 
         platform = injector.getInstance(BungeeAFKPlatform.class);

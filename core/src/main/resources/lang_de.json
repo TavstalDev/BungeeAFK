@@ -23,6 +23,7 @@
   "notification.movement_pattern_connect_message": "<prefix><red>Du wurdest aufgrund eines verdächtigen Bewegungsmusters auf den AFK-Server connected.",
   "notification.movement_pattern_teleport_message": "<prefix><gray>Du wurdest aufgrund eines verdächtigen Bewegungsmusters zum AFK-Standort teleportiert.",
   "permission.no_permission": "<prefix><red>Die fehlt dazu die Berechtigung: <permission>.",
+  "command.help": "<prefix><gray>Hilfe zum Plugin gibt es auf der offiziellen <blue><u><click:open_url:'https://fameless9.github.io/BungeeAFK'>BungeeAFK Documentation</click></u></blue> Seite.",
   "command.usage": "<prefix><red>Benutze: <usage>.",
   "command.console_command": "<prefix><red>Dieser Command kann nur in der Konsole ausgeführt werden.",
   "command.not_a_player": "<prefix><red>Nur Spieler können diesen Command ausführen.",
@@ -80,6 +81,7 @@
   "command.movement_pattern_notify_player_toggled": "<prefix><green>Spieler Benachrichtigung bei Bewegungsmuster-Erkennung wurde auf <notify> gesetzt.",
   "command.movement_pattern_no_detections_found": "<prefix><gray>Keine Bewegungsmuster-Erkennungen für <player> gefunden.",
   "command.movement_pattern_detection_history": "<prefix><gray>Bewegungsmuster-Erkennungshistorie für <player>:<br><gray>Anzahl der Erkennungen: <detection-count><br><detections>.",
+  "command.config_dump": "<prefix><green>Aktuelle Konfiguration:<br><gray><dump>",
   "error.no_caller_type": "<prefix><red>Falscher CallerType.",
   "actionbar.afk": "<blue>Du bist AFK"
 }

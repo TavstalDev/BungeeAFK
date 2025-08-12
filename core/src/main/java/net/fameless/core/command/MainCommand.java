@@ -42,9 +42,17 @@ public class MainCommand extends Command {
     @Override
     protected void executeCommand(CommandCaller caller, String @NotNull [] args) {
         if (args.length < 2) return;
+        if (args[0].equalsIgnoreCase("help")) {
+            caller.sendMessage(Caption.of("command.help"));
+            return;
+        }
         if (args[0].equalsIgnoreCase("configure")) {
             AFKHandler afkHandler = BungeeAFK.getAFKHandler();
             switch (args[1]) {
+                case "dump" -> {
+                    String dump = PluginConfig.get().dump();
+                    caller.sendMessage(Caption.of("command.config_dump", TagResolver.resolver("dump", Tag.inserting(Component.text(dump)))));
+                }
                 case "allow-bypass" -> {
                     if (args.length < 3) {
                         sendUsage(caller);
@@ -204,6 +212,7 @@ public class MainCommand extends Command {
                     PluginConfig.reload();
                     afkHandler.fetchConfigValues();
                     BungeeAFK.getAutoClickerDetector().reloadConfigValues();
+                    BungeeAFK.getMovementPatternDetection().reloadConfigValues();
                     caller.sendMessage(Caption.of("command.config_reloaded"));
                 }
                 case "saveconfig" -> {
@@ -627,7 +636,7 @@ public class MainCommand extends Command {
                 if (args[0].equalsIgnoreCase("configure")) {
                     completions.addAll(Arrays.asList(
                             "afk-delay", "action-delay", "action", "caption", "warning-delay",
-                            "allow-bypass", "reloadconfig", "afk-location", "saveconfig"
+                            "allow-bypass", "reloadconfig", "afk-location", "saveconfig", "dump"
                     ));
                     if (BungeeAFK.isProxy()) {
                         completions.addAll(Arrays.asList("disable-server", "enable-server", "disabled-servers"));

@@ -54,7 +54,7 @@ disabled-servers:
 # Map of regions where AFK detection can be toggled on or off independently
 # Players in regions where AFK detection is false will not be marked as AFK, and no actions will be performed
 # Regions should be added using the /bafk region add <param> command
-# Manually adding regions here is possible, but not recommended, unless you know what you're doing
+# Manually adding regions here is possible, but not recommended, unless you know what you're doing. Run /bafk region reload to reload regions from here
 bypass-regions:
 
 # Auto-Clicker Detection Settings
@@ -79,10 +79,6 @@ auto-clicker:
   # "nothing" - nothing will happen
   action: "kick"
 
-  # How many detections to keep in history for each player
-  # /bafk auto-clicker detection-history <player> command will show the last detections
-  detection-history-size: 10
-
   # List of servers where auto clicker detection is disabled
   disabled-servers: []
 
@@ -102,7 +98,6 @@ auto-clicker:
   min-click-interval: 30
 
 # Movement Pattern Detection Settings
-# Detection history is shared with auto-clicker detection, same settings apply
 movement-pattern:
   enabled: true
 

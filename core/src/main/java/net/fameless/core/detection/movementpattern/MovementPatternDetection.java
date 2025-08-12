@@ -20,9 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
@@ -30,9 +28,10 @@ public class MovementPatternDetection {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("BungeeAFK/" + MovementPatternDetection.class.getSimpleName());
 
-    private final Map<BAFKPlayer<?>, Map<Location, List<Long>>> playerMovementHistory = new ConcurrentHashMap<>();
+    private final Map<BAFKPlayer<?>, Map<Location, Deque<Long>>> playerMovementHistory = new ConcurrentHashMap<>();
 
     private final Consumer<BAFKPlayer<?>> defaultActionOnDetection;
+    private final long cutoffTime = 10 * 60 * 1000; // Time after which an entry should be removed - 10 minutes in milliseconds
     private double certaintyThreshold;
     private int sampleSize;
     private List<String> disabledServers;
@@ -40,6 +39,11 @@ public class MovementPatternDetection {
     boolean enabled;
 
     public MovementPatternDetection() {
+        if (BungeeAFK.getMovementPatternDetection() != null) {
+            throw new IllegalStateException("You may not create another instance of MovementPatternDetection!");
+        }
+        LOGGER.info("Initializing MovementPatternDetection...");
+
         reloadConfigValues();
         defaultActionOnDetection = player -> {
             ActionOnDetection action;
@@ -77,22 +81,31 @@ public class MovementPatternDetection {
         location = location.getBlockLocation();
         long now = System.currentTimeMillis();
 
-        playerMovementHistory
+        Deque<Long> timestamps = playerMovementHistory
                 .computeIfAbsent(player, k -> new ConcurrentHashMap<>())
-                .computeIfAbsent(location, k -> new ArrayList<>())
-                .add(now);
+                .computeIfAbsent(location, k -> new ArrayDeque<>());
 
-        List<Long> timestamps = playerMovementHistory.get(player).get(location);
+        // Remove timestamps older than 10 minutes
+        while (!timestamps.isEmpty() && timestamps.peekFirst() < cutoffTime) {
+            timestamps.pollFirst();
+        }
 
-        // remove older than 10 minutes
-        timestamps.removeIf(timestamp -> timestamp < now - 10 * 60 * 1000);
-        playerMovementHistory.get(player).put(location, timestamps);
+        // If we have more than sampleSize samples, remove the oldest ones
+        while (timestamps.size() >= sampleSize) {
+            timestamps.pollFirst();
+        }
+
+        timestamps.addLast(now);
 
         // if we have enough samples, analyze the movement pattern
         if (timestamps.size() >= sampleSize) {
-            List<Long> intervals = new ArrayList<>(timestamps.size() - 1);
-            for (int i = 1; i < timestamps.size(); i++) {
-                intervals.add(timestamps.get(i) - timestamps.get(i - 1));
+            List<Long> intervals = new ArrayList<>(sampleSize - 1);
+            Iterator<Long> iterator = timestamps.iterator();
+            long prev = iterator.next();
+            while (iterator.hasNext()) {
+                long current = iterator.next();
+                intervals.add(current - prev);
+                prev = current;
             }
 
             double stdDev = DetectionUtil.calculateStdDev(intervals);

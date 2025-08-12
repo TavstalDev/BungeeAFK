@@ -137,4 +137,8 @@ public record YamlConfig(Map<String, Object> data) {
     public boolean contains(String key) {
         return getValue(key) != null;
     }
+
+    public String dump() {
+        return PluginConfig.YAML.dump(data);
+    }
 }

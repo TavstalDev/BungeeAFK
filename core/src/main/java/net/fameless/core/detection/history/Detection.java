@@ -39,19 +39,6 @@ public class Detection {
         this.serverName = serverName;
         this.playerName = playerName;
 
-        List<Detection> playerDetections = new ArrayList<>();
-        for (Detection d : DETECTIONS) {
-            if (d.playerName.equalsIgnoreCase(playerName)) {
-                playerDetections.add(d);
-            }
-        }
-
-        final int maxSize = PluginConfig.get().getInt("auto-clicker.detection-history-size", 10);
-        if (playerDetections.size() >= maxSize) {
-            Detection oldest = Collections.min(playerDetections, Comparator.comparingLong(Detection::getTimestamp));
-            DETECTIONS.remove(oldest);
-        }
-
         DETECTIONS.add(this);
     }
 

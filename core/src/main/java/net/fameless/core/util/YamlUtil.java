@@ -66,7 +66,7 @@ public class YamlUtil {
             # Map of regions where AFK detection can be toggled on or off independently
             # Players in regions where AFK detection is false will not be marked as AFK, and no actions will be performed
             # Regions should be added using the /bafk region add <param> command
-            # Manually adding regions here is possible, but not recommended, unless you know what you're doing
+            # Manually adding regions here is possible, but not recommended, unless you know what you're doing. Run /bafk region reload to reload regions from here
             %s
 
             # Auto-Clicker Detection Settings
@@ -88,10 +88,6 @@ public class YamlUtil {
               # "nothing" - nothing will happen
               action: %s
 
-              # How many detections to keep in history for each player
-              # /bafk auto-clicker detection-history <player> command will show the last detections
-              detection-history-size: %d
-
               # List of servers where auto clicker detection is disabled
               disabled-servers:
                 %s
@@ -111,7 +107,6 @@ public class YamlUtil {
               min-click-interval: %d
 
             # Movement Pattern Detection Settings
-            # Detection history is shared with auto-clicker detection, same settings apply
             movement-pattern:
               enabled: %b
 
@@ -156,7 +151,6 @@ public class YamlUtil {
                 PluginConfig.get().getString("auto-clicker.notify-permission", "bungeeafk.auto-clicker.notify"),
                 PluginConfig.get().getBoolean("auto-clicker.notify-player", true),
                 PluginConfig.get().getString("auto-clicker.action", "open-inv"),
-                PluginConfig.get().getInt("auto-clicker.detection-history-size", 10),
                 PluginConfig.get().getStringList("auto-clicker.disabled-servers"),
                 PluginConfig.get().getInt("auto-clicker.sample-size", 200),
                 PluginConfig.get().getInt("auto-clicker.consecutive-detections", 3),

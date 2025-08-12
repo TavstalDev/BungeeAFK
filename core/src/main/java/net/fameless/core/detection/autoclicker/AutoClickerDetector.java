@@ -41,6 +41,7 @@ public class AutoClickerDetector {
         if (BungeeAFK.getAutoClickerDetector() != null) {
             throw new IllegalStateException("You may not create another instance of AutoClickerDetector!");
         }
+        LOGGER.info("Initializing AutoClickerDetector...");
 
         reloadConfigValues();
 

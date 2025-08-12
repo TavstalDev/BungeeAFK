@@ -42,15 +42,6 @@ public class PluginConfig {
         config = new YamlConfig(YAML.load(yamlContent));
 
         loadBypassRegions();
-
-        LOGGER.info("\nYour BungeeAFK configuration: \n  * lang: {} \n  * warning-delay: {} \n  * afk-delay: {} \n  * action-delay: {} \n  * action: {} \n  * afk-server-name: {} \n  * allow-bypass: {}",
-                config.getString("lang", "en"),
-                config.getInt("warning-delay", 300),
-                config.getInt("afk-delay", 600),
-                config.getInt("action-delay", 630),
-                config.getString("action", "kick"),
-                config.getString("afk-server-name", "not configured"),
-                config.getBoolean("allow-bypass", true));
     }
 
     public static void loadBypassRegions() {
