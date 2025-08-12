@@ -31,12 +31,12 @@ public class MovementPatternDetection {
     private final Map<BAFKPlayer<?>, Map<Location, Deque<Long>>> playerMovementHistory = new ConcurrentHashMap<>();
 
     private final Consumer<BAFKPlayer<?>> defaultActionOnDetection;
-    private final long cutoffTime = 10 * 60 * 1000; // Time after which an entry should be removed - 10 minutes in milliseconds
     private double certaintyThreshold;
     private int sampleSize;
     private List<String> disabledServers;
     boolean allowBypass;
     boolean enabled;
+    int clearAfterSeconds;
 
     public MovementPatternDetection() {
         if (BungeeAFK.getMovementPatternDetection() != null) {
@@ -71,6 +71,11 @@ public class MovementPatternDetection {
         this.disabledServers = PluginConfig.get().getStringList("movement-pattern.disabled-servers");
         this.allowBypass = PluginConfig.get().getBoolean("movement-pattern.allow-bypass", true);
         this.enabled = PluginConfig.get().getBoolean("movement-pattern.enabled", true);
+        this.clearAfterSeconds = PluginConfig.get().getInt("movement-pattern.clear-after", 600);
+
+        if (clearAfterSeconds < 0) {
+            clearAfterSeconds = 0;
+        }
     }
 
     public void registerMovement(@NotNull BAFKPlayer<?> player, Location location) {
@@ -85,9 +90,11 @@ public class MovementPatternDetection {
                 .computeIfAbsent(player, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(location, k -> new ArrayDeque<>());
 
-        // Remove timestamps older than 10 minutes
-        while (!timestamps.isEmpty() && timestamps.peekFirst() < cutoffTime) {
-            timestamps.pollFirst();
+        // Remove timestamps older than clearAfterSeconds
+        if (clearAfterSeconds != 0) {
+            while (!timestamps.isEmpty() && timestamps.peekFirst() < now - clearAfterSeconds * 1000L) {
+                timestamps.pollFirst();
+            }
         }
 
         // If we have more than sampleSize samples, remove the oldest ones

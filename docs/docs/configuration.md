@@ -88,11 +88,6 @@ You can choose from the following options:
 - `open-inv`: An empty inventory will be opened for the player to prevent clicks from impacting the world.
 - `nothing`: No action will be taken.
 
-#### Detection History (`auto-clicker.detection-history-size`)
-This is the number of detection events that will be stored in the history for each player.  
-History can be viewed using the `/bafk auto-clicker detection-history <player>` command.  
-Default is `10`.
-
 #### Disabled Servers for Auto Clicker Detection (`auto-clicker.disabled-servers`)
 This is a list of servers where auto clicker detection is disabled.  
 Players on these servers will not be checked for auto clicker usage.
@@ -136,6 +131,17 @@ Example:
 movement-pattern:  
   disabled-servers: [lobby, survival]  
 ```  
+
+#### Clear After (`movement-pattern.clear-after`)
+Time after which an individual movement is cleared and therefore cannot be used for analyzing patterns.
+This is to prevent high memory usage and to ensure that only recent movements are considered.
+If set to 600, movements older than 10 minutes will not be considered for pattern detection.
+If set to 0, movements will never be cleared and will be kept in memory indefinitely.
+
+Setting the value to 0 may lead to high memory usage if many players are online.
+and they move frequently, so it is recommended to set this to a reasonable value
+depending on your server's activity and player base size.
+A value of 600 (10 minutes) is a good balance for most servers.
 
 #### Required Certainty (`movement-pattern.certainty-threshold`)
 This is the minimum certainty required for a movement pattern to be considered suspicious.  
