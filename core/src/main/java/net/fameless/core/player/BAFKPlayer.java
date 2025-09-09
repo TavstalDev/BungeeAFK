@@ -101,7 +101,7 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
             MessageBroadcaster.broadcastMessageToFiltered(
                     Caption.of("notification.afk_return_broadcast",
                             TagResolver.resolver("player", Tag.inserting(Component.text(getName())))),
-                    PlayerFilters.notMatching(this)
+                    PlayerFilters.onServer(getCurrentServerName()).and(PlayerFilters.notMatching(this))
             );
         }
         this.afkState = event.getNewState();

@@ -218,10 +218,12 @@ public abstract class AFKHandler {
                     action.getMessageKey(),
                     TagResolver.resolver("action-delay", Tag.inserting(Component.text(Format.formatTime((int) (timeUntilAction / 1000)))))
             ));
+
+
             MessageBroadcaster.broadcastMessageToFiltered(
                     Caption.of("notification.afk_broadcast",
                             TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
-                    PlayerFilters.notMatching(player)
+                    PlayerFilters.onServer(player.getCurrentServerName()).and(PlayerFilters.notMatching(player))
             );
             LOGGER.info("{} is now AFK.", player.getName());
         }
@@ -263,16 +265,17 @@ public abstract class AFKHandler {
         player.sendMessage(connectMessage);
         MessageBroadcaster.broadcastMessageToFiltered(
                 connectBroadcastMessage,
-                PlayerFilters.notMatching(player)
+                PlayerFilters.onServer(afkServerName).and(PlayerFilters.notMatching(player))
         );
         LOGGER.info("Moved {} to AFK server.", player.getName());
     }
 
     public void handleKickAction(@NotNull BAFKPlayer<?> player, Component reason, Component broadcastMessage) {
+        String currentServerName = player.getCurrentServerName();
         player.kick(reason);
         MessageBroadcaster.broadcastMessageToFiltered(
                 broadcastMessage,
-                PlayerFilters.notMatching(player)
+                PlayerFilters.onServer(currentServerName).and(PlayerFilters.notMatching(player))
         );
         LOGGER.info("Kicked {} for being AFK.", player.getName());
     }
