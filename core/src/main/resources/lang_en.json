@@ -83,5 +83,6 @@
   "command.movement_pattern_detection_history": "<prefix><gray>Movement Pattern detection history for <player>:<br><gray>Number of detections: <detection-count><br><detections>.",
   "command.config_dump": "<prefix><green>Current configuration:<br><gray><dump>",
   "error.no_caller_type": "<prefix><red>Invalid CallerType.",
-  "actionbar.afk": "<blue>You are AFK"
+  "actionbar.afk": "<blue>You are AFK",
+  "actionbar.afk-action-taken": "<red>You are in the AFK room."
 }
