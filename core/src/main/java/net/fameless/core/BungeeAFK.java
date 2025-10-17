@@ -73,6 +73,9 @@ public class BungeeAFK {
         Caption.loadDefaultLanguages();
         Caption.setCurrentLanguage(Language.ofIdentifier(PluginConfig.get().getString("lang", "en")));
 
+        LOGGER.info("initializing BungeeAFK API...");
+        new BungeeAFKAPIImpl();
+
         initialized = true;
     }
 
@@ -101,6 +104,15 @@ public class BungeeAFK {
             PluginConfig.get().set("afk-delay", 180);
             PluginConfig.get().set("action-delay", 420);
             afkHandler.fetchConfigValues();
+        }
+    }
+
+    public static boolean isAPIAvailable() {
+        try {
+            Class.forName("net.fameless.api.service.BackendAPI");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
         }
     }
 

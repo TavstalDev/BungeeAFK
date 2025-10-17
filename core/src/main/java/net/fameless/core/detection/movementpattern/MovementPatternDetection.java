@@ -1,12 +1,13 @@
 package net.fameless.core.detection.movementpattern;
 
+import net.fameless.api.event.EventDispatcher;
+import net.fameless.api.event.PlayerMovementPatternDetectedEvent;
 import net.fameless.core.BungeeAFK;
+import net.fameless.core.adapter.APIAdapter;
 import net.fameless.core.caption.Caption;
 import net.fameless.core.config.PluginConfig;
 import net.fameless.core.detection.history.Detection;
 import net.fameless.core.detection.history.DetectionType;
-import net.fameless.core.event.EventDispatcher;
-import net.fameless.core.event.PlayerMovementPatternDetectedEvent;
 import net.fameless.core.handling.AFKState;
 import net.fameless.core.location.Location;
 import net.fameless.core.player.BAFKPlayer;
@@ -141,8 +142,8 @@ public class MovementPatternDetection {
                 PlayerFilters.hasPermission(PluginConfig.get().getString("movement-pattern.notify-permission", "bungeeafk.movement-pattern.notify")),
                 PlayerFilters.notMatching(player));
 
-        PlayerMovementPatternDetectedEvent event = new PlayerMovementPatternDetectedEvent(player, defaultActionOnDetection);
+        PlayerMovementPatternDetectedEvent event = new PlayerMovementPatternDetectedEvent(APIAdapter.adapt(player), APIAdapter.adaptModelConsumer(defaultActionOnDetection));
         EventDispatcher.post(event);
-        event.getAction().accept(player);
+        APIAdapter.adaptCoreConsumer(event.getAction()).accept(player);
     }
 }

@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "net.fameless"
-version = "2.4.0"
+version = "2.4.1"
 description = "Core features implementing the basic logic of BungeeAFK"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
@@ -12,6 +12,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":bungeeafk-api"))
     compileOnly(libs.annotations)
     implementation(libs.gson)
     implementation(libs.guice)

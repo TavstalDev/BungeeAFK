@@ -1,8 +1,9 @@
 package net.fameless.bungee;
 
+import net.fameless.api.event.EventDispatcher;
+import net.fameless.api.event.PlayerKickEvent;
+import net.fameless.core.adapter.APIAdapter;
 import net.fameless.core.command.framework.CallerType;
-import net.fameless.core.event.EventDispatcher;
-import net.fameless.core.event.PlayerKickEvent;
 import net.fameless.core.location.Location;
 import net.fameless.core.messaging.RequestType;
 import net.fameless.core.player.BAFKPlayer;
@@ -93,7 +94,7 @@ public class BungeePlayer extends BAFKPlayer<ProxiedPlayer> {
         ProxiedPlayer player = getPlatformPlayer().orElse(null);
         if (player == null) return;
 
-        PlayerKickEvent event = new PlayerKickEvent(this, reason);
+        PlayerKickEvent event = new PlayerKickEvent(APIAdapter.adapt(this), reason);
         EventDispatcher.post(event);
 
         if (event.isCancelled()) {

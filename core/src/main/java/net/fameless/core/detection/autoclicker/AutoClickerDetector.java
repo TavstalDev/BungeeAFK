@@ -1,12 +1,13 @@
 package net.fameless.core.detection.autoclicker;
 
+import net.fameless.api.event.EventDispatcher;
+import net.fameless.api.event.PlayerAutoClickerDetectedEvent;
 import net.fameless.core.BungeeAFK;
+import net.fameless.core.adapter.APIAdapter;
 import net.fameless.core.caption.Caption;
 import net.fameless.core.config.PluginConfig;
 import net.fameless.core.detection.history.Detection;
 import net.fameless.core.detection.history.DetectionType;
-import net.fameless.core.event.EventDispatcher;
-import net.fameless.core.event.PlayerAutoClickerDetectedEvent;
 import net.fameless.core.player.BAFKPlayer;
 import net.fameless.core.util.DetectionUtil;
 import net.fameless.core.util.PlayerFilters;
@@ -137,8 +138,8 @@ public class AutoClickerDetector {
         playerClickTimes.remove(player);
         detectionStreaks.remove(player);
 
-        PlayerAutoClickerDetectedEvent event = new PlayerAutoClickerDetectedEvent(player, this.defaultActionOnDetection);
+        PlayerAutoClickerDetectedEvent event = new PlayerAutoClickerDetectedEvent(APIAdapter.adapt(player), APIAdapter.adaptModelConsumer(defaultActionOnDetection));
         EventDispatcher.post(event);
-        event.getAction().accept(player);
+        APIAdapter.adaptCoreConsumer(event.getAction()).accept(player);
     }
 }

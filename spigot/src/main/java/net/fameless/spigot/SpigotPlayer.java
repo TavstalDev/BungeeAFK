@@ -1,8 +1,9 @@
 package net.fameless.spigot;
 
+import net.fameless.api.event.EventDispatcher;
+import net.fameless.api.event.PlayerKickEvent;
+import net.fameless.core.adapter.APIAdapter;
 import net.fameless.core.command.framework.CallerType;
-import net.fameless.core.event.EventDispatcher;
-import net.fameless.core.event.PlayerKickEvent;
 import net.fameless.core.location.Location;
 import net.fameless.core.player.BAFKPlayer;
 import net.fameless.core.player.GameMode;
@@ -103,14 +104,13 @@ public class SpigotPlayer extends BAFKPlayer<Player> {
             Player player = getPlatformPlayer().orElse(null);
             if (player == null) return;
 
-            PlayerKickEvent event = new PlayerKickEvent(this, reason);
+            PlayerKickEvent event = new PlayerKickEvent(APIAdapter.adapt(this), reason);
             EventDispatcher.post(event);
 
             if (event.isCancelled()) {
                 LOGGER.info("PlayerKickEvent was cancelled for player: {}", getName());
                 return;
             }
-
             player.kickPlayer(LegacyComponentSerializer.legacySection().serialize(event.getReason()));
         });
     }

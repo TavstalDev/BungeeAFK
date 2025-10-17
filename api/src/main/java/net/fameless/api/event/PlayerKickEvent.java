@@ -1,6 +1,6 @@
-package net.fameless.core.event;
+package net.fameless.api.event;
 
-import net.fameless.core.player.BAFKPlayer;
+import net.fameless.api.model.Player;
 import net.kyori.adventure.text.Component;
 
 /**
@@ -12,11 +12,11 @@ import net.kyori.adventure.text.Component;
  */
 public class PlayerKickEvent implements CancellableEvent {
 
-    private final BAFKPlayer<?> player;
+    private final Player player;
     private Component reason;
     private boolean cancelled;
 
-    public PlayerKickEvent(BAFKPlayer<?> player, Component reason) {
+    public PlayerKickEvent(Player player, Component reason) {
         this.player = player;
         this.reason = reason;
     }
@@ -26,7 +26,7 @@ public class PlayerKickEvent implements CancellableEvent {
      *
      * @return the player being kicked
      */
-    public BAFKPlayer<?> getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 

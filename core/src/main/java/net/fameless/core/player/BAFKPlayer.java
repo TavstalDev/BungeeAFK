@@ -1,11 +1,12 @@
 package net.fameless.core.player;
 
+import net.fameless.api.event.EventDispatcher;
+import net.fameless.api.event.PlayerAFKStateChangeEvent;
 import net.fameless.core.BungeeAFK;
+import net.fameless.core.adapter.APIAdapter;
 import net.fameless.core.caption.Caption;
 import net.fameless.core.command.framework.CommandCaller;
 import net.fameless.core.config.PluginConfig;
-import net.fameless.core.event.EventDispatcher;
-import net.fameless.core.event.PlayerAFKStateChangeEvent;
 import net.fameless.core.handling.AFKState;
 import net.fameless.core.location.Location;
 import net.fameless.core.region.Region;
@@ -91,20 +92,23 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
     public void setAfkState(AFKState afkState) {
         if (this.afkState == afkState) return;
 
-        PlayerAFKStateChangeEvent event = new PlayerAFKStateChangeEvent(this, this.afkState, afkState);
+        PlayerAFKStateChangeEvent event = new PlayerAFKStateChangeEvent(APIAdapter.adapt(this), APIAdapter.adapt(this.afkState), APIAdapter.adapt(afkState));
         EventDispatcher.post(event);
+        AFKState newState = APIAdapter.adapt(event.getNewState());
 
-        if (event.getNewState() == this.afkState) return;
+        if (newState == this.afkState) return;
 
-        if ((this.afkState == AFKState.AFK || this.afkState == AFKState.ACTION_TAKEN) && event.getNewState() == AFKState.ACTIVE) {
+        if ((this.afkState == AFKState.AFK || this.afkState == AFKState.ACTION_TAKEN) && newState == AFKState.ACTIVE) {
             sendMessage(Caption.of("notification.afk_return"));
-            MessageBroadcaster.broadcastMessageToFiltered(
-                    Caption.of("notification.afk_return_broadcast",
-                            TagResolver.resolver("player", Tag.inserting(Component.text(getName())))),
-                    PlayerFilters.notMatching(this)
-            );
+            if (PluginConfig.get().getBoolean("afk-broadcast", true)) {
+                MessageBroadcaster.broadcastMessageToFiltered(
+                        Caption.of("notification.afk_return_broadcast",
+                                TagResolver.resolver("player", Tag.inserting(Component.text(getName())))),
+                        PlayerFilters.notMatching(this)
+                );
+            }
         }
-        this.afkState = event.getNewState();
+        this.afkState = newState;
     }
 
     public void sendMessage(Component message) {

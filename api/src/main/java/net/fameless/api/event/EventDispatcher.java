@@ -1,4 +1,4 @@
-package net.fameless.core.event;
+package net.fameless.api.event;
 
 import com.google.common.eventbus.EventBus;
 

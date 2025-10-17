@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     implementation(project(":bungeeafk-core"))
+    implementation(project(":bungeeafk-api"))
     compileOnly(libs.bungee)
     compileOnly(libs.annotations)
     implementation(libs.guice)
@@ -20,7 +21,7 @@ dependencies {
 }
 
 group = "net.fameless"
-version = "2.4.0"
+version = "2.4.1"
 description = "BungeeAFK for BungeeCord proxies"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
@@ -32,7 +33,7 @@ tasks {
     shadowJar {
         archiveBaseName.set("BungeeAFK-Bungee")
         archiveClassifier.set("")
-        archiveVersion.set("2.4.0")
+        archiveVersion.set("2.4.1")
 
         relocate("org.bstats", "net.fameless.bungeeafk.bstats")
     }

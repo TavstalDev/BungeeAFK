@@ -7,7 +7,7 @@ import java.util.*;
 
 public record YamlConfig(Map<String, Object> data) {
 
-    private @Nullable Object getValue(@NotNull String key) {
+    public @Nullable Object getValue(@NotNull String key) {
         String[] parts = key.split("\\.");
         Object current = data;
         for (int i = 0; i < parts.length; i++) {
