@@ -82,6 +82,8 @@
   "command.movement_pattern_no_detections_found": "<prefix><gray>Keine Bewegungsmuster-Erkennungen für <player> gefunden.",
   "command.movement_pattern_detection_history": "<prefix><gray>Bewegungsmuster-Erkennungshistorie für <player>:<br><gray>Anzahl der Erkennungen: <detection-count><br><detections>.",
   "command.config_dump": "<prefix><green>Aktuelle Konfiguration:<br><gray><dump>",
+  "command.broadcast_afk_status_enabled": "<prefix><gray>AFK-Status Broadcasts sind jetzt aktiviert.",
+  "command.broadcast_afk_status_disabled": "<prefix><gray>AFK-Status Broadcasts wurden deaktiviert.",
   "error.no_caller_type": "<prefix><red>Falscher CallerType.",
   "actionbar.afk": "<blue>Du bist AFK"
 }

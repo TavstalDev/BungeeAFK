@@ -100,11 +100,13 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
 
         if ((this.afkState == AFKState.AFK || this.afkState == AFKState.ACTION_TAKEN) && newState == AFKState.ACTIVE) {
             sendMessage(Caption.of("notification.afk_return"));
-            MessageBroadcaster.broadcastMessageToFiltered(
-                    Caption.of("notification.afk_return_broadcast",
-                            TagResolver.resolver("player", Tag.inserting(Component.text(getName())))),
-                    PlayerFilters.notMatching(this)
-            );
+            if (PluginConfig.get().getBoolean("afk-broadcast", true)) {
+                MessageBroadcaster.broadcastMessageToFiltered(
+                        Caption.of("notification.afk_return_broadcast",
+                                TagResolver.resolver("player", Tag.inserting(Component.text(getName())))),
+                        PlayerFilters.notMatching(this)
+                );
+            }
         }
         this.afkState = newState;
     }

@@ -63,6 +63,27 @@ public class MainCommand extends Command {
                     String dump = PluginConfig.get().dump();
                     caller.sendMessage(Caption.of("command.config_dump", TagResolver.resolver("dump", Tag.inserting(Component.text(dump)))));
                 }
+                case "afk-broadcasts" -> {
+                    if (args.length < 3) {
+                        sendUsage(caller);
+                        return;
+                    }
+
+                    boolean broadcast;
+                    try {
+                        broadcast = Boolean.parseBoolean(args[2]);
+                    } catch (IllegalArgumentException e) {
+                        caller.sendMessage(Caption.of("command.invalid_boolean"));
+                        return;
+                    }
+
+                    PluginConfig.get().set("afk-broadcast", broadcast);
+                    if (broadcast) {
+                        caller.sendMessage(Caption.of("command.broadcast_afk_status_enabled"));
+                    } else {
+                        caller.sendMessage(Caption.of("command.broadcast_afk_status_disabled"));
+                    }
+                }
                 case "allow-bypass" -> {
                     if (args.length < 3) {
                         sendUsage(caller);
@@ -643,7 +664,7 @@ public class MainCommand extends Command {
                 if (args[0].equalsIgnoreCase("configure")) {
                     completions.addAll(Arrays.asList(
                             "afk-delay", "action-delay", "action", "caption", "warning-delay",
-                            "allow-bypass", "reloadconfig", "afk-location", "saveconfig", "dump"
+                            "allow-bypass", "reloadconfig", "afk-location", "saveconfig", "dump", "afk-broadcasts"
                     ));
                     if (BungeeAFK.isProxy()) {
                         completions.addAll(Arrays.asList("disable-server", "enable-server", "disabled-servers"));
@@ -679,7 +700,7 @@ public class MainCommand extends Command {
                         for (Language language : Language.values()) {
                             completions.add(language.getIdentifier());
                         }
-                    } else if (args[1].equalsIgnoreCase("allow-bypass")) {
+                    } else if (args[1].equalsIgnoreCase("allow-bypass") || args[1].equalsIgnoreCase("afk-broadcasts")) {
                         completions.addAll(Arrays.asList("true", "false"));
                     } else if (args[1].equalsIgnoreCase("disable-server") && BungeeAFK.isProxy()) {
                         List<String> serverNames = new ArrayList<>(BungeeAFK.getPlatform().getServers());
