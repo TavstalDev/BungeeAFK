@@ -30,7 +30,7 @@
   "command.player_not_found": "<prefix><red>Player <player> couldn't be found.",
   "command.invalid_action": "<prefix><red>Invalid action identifier. Use 'kick', 'connect' or 'nothing'.",
   "command.invalid_number": "<prefix><red>Please enter a valid number.",
-  "command.invalid_language": "<prefix><red>Invalid language. Use 'de' or 'en'.",
+  "command.invalid_language": "<prefix><red>Invalid language. Use 'de', 'en' or 'hu'.",
   "command.afk_delay_set": "<prefix><green>AFK delay set to <delay>.",
   "command.action_delay_set": "<prefix><green>Action delay set to <delay>.",
   "command.action_set": "<prefix><green>Action set to <action>.",
