@@ -4,7 +4,8 @@ import org.jetbrains.annotations.Nullable;
 
 public enum Language {
     ENGLISH("en", "English"),
-    GERMAN("de", "Deutsch");
+    GERMAN("de", "Deutsch"),
+    HUNGARIAN("hu", "Magyar");
 
     private final String identifier;
     private final String friendlyName;
