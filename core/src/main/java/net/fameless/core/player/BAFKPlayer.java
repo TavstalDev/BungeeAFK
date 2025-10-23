@@ -105,7 +105,7 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
             if (PluginConfig.get().getBoolean("afk-broadcast", true)) {
                 PlayerFilter filter = PlayerFilters.notMatching(this);
                 if (PluginConfig.get().getBoolean("afk-broadcast-only-current-server", true)) {
-                    filter = filter.and(PlayerFilters.onServer(getCurrentServerName()));
+                    filter = filter.and(PlayerFilters.onServer(this.getCurrentServerName()));
                 }
 
                 MessageBroadcaster.broadcastMessageToFiltered(
