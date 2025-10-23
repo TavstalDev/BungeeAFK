@@ -7,6 +7,8 @@ import net.fameless.core.adapter.APIAdapter;
 import net.fameless.core.caption.Caption;
 import net.fameless.core.command.framework.CommandCaller;
 import net.fameless.core.config.PluginConfig;
+import net.fameless.core.event.EventDispatcher;
+import net.fameless.core.event.PlayerAFKStateChangeEvent;
 import net.fameless.core.handling.AFKState;
 import net.fameless.core.location.Location;
 import net.fameless.core.region.Region;
@@ -104,7 +106,7 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
                 MessageBroadcaster.broadcastMessageToFiltered(
                         Caption.of("notification.afk_return_broadcast",
                                 TagResolver.resolver("player", Tag.inserting(Component.text(getName())))),
-                        PlayerFilters.notMatching(this)
+                        PlayerFilters.onServer(getCurrentServerName()).and(PlayerFilters.notMatching(this))
                 );
             }
         }

@@ -222,7 +222,7 @@ public abstract class AFKHandler {
                 MessageBroadcaster.broadcastMessageToFiltered(
                         Caption.of("notification.afk_broadcast",
                                 TagResolver.resolver("player", Tag.inserting(Component.text(player.getName())))),
-                        PlayerFilters.notMatching(player)
+                        PlayerFilters.onServer(player.getCurrentServerName()).and(PlayerFilters.notMatching(player))
                 );
             }
             LOGGER.info("{} is now AFK.", player.getName());
@@ -266,18 +266,19 @@ public abstract class AFKHandler {
         if (PluginConfig.get().getBoolean("afk-broadcast", true)) {
             MessageBroadcaster.broadcastMessageToFiltered(
                     connectBroadcastMessage,
-                    PlayerFilters.notMatching(player)
+                    PlayerFilters.onServer(afkServerName).and(PlayerFilters.notMatching(player))
             );
         }
         LOGGER.info("Moved {} to AFK server.", player.getName());
     }
 
     public void handleKickAction(@NotNull BAFKPlayer<?> player, Component reason, Component broadcastMessage) {
+        String currentServerName = player.getCurrentServerName();
         player.kick(reason);
         if (PluginConfig.get().getBoolean("afk-broadcast", true)) {
             MessageBroadcaster.broadcastMessageToFiltered(
                     broadcastMessage,
-                    PlayerFilters.notMatching(player)
+                    PlayerFilters.onServer(currentServerName).and(PlayerFilters.notMatching(player))
             );
         }
         LOGGER.info("Kicked {} for being AFK.", player.getName());
@@ -328,8 +329,11 @@ public abstract class AFKHandler {
     }
 
     private void sendActionBar(@NotNull BAFKPlayer<?> player) {
-        if (player.getAfkState() == AFKState.AFK || player.getAfkState() == AFKState.ACTION_TAKEN) {
+        if (player.getAfkState() == AFKState.AFK) {
             player.sendActionbar(Caption.of("actionbar.afk"));
+        }
+        else if (player.getAfkState() == AFKState.ACTION_TAKEN) {
+            player.sendActionbar(Caption.of("actionbar.afk-action-taken"));
         }
     }
 

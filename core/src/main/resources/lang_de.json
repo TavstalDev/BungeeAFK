@@ -85,5 +85,6 @@
   "command.broadcast_afk_status_enabled": "<prefix><gray>AFK-Status Broadcasts sind jetzt aktiviert.",
   "command.broadcast_afk_status_disabled": "<prefix><gray>AFK-Status Broadcasts wurden deaktiviert.",
   "error.no_caller_type": "<prefix><red>Falscher CallerType.",
-  "actionbar.afk": "<blue>Du bist AFK"
+  "actionbar.afk": "<blue>Du bist AFK",
+  "actionbar.afk-action-taken": "<red>Du bist im AFK-Raum."
 }
