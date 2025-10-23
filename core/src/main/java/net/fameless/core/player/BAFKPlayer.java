@@ -36,6 +36,7 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
     private AFKState afkState = AFKState.ACTIVE;
     private GameMode gameMode = GameMode.SURVIVAL;
     private Location location = new Location("world", 0, 0, 0, 0, 0);
+    private long afkCommandCooldown = 0;
 
     public BAFKPlayer(UUID uuid) {
         if (of(uuid).isPresent()) {
@@ -148,6 +149,13 @@ public abstract class BAFKPlayer<PlatformPlayer> implements CommandCaller {
         this.location = location;
     }
 
+    public long getAfkCommandCooldown() {
+        return afkCommandCooldown;
+    }
+
+    public void setAfkCommandCooldown(long afkCommandCooldown) {
+        this.afkCommandCooldown = afkCommandCooldown;
+    }
 
     public abstract String getName();
 

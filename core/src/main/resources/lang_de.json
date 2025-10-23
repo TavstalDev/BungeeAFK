@@ -84,6 +84,7 @@
   "command.config_dump": "<prefix><green>Aktuelle Konfiguration:<br><gray><dump>",
   "command.broadcast_afk_status_enabled": "<prefix><gray>AFK-Status Broadcasts sind jetzt aktiviert.",
   "command.broadcast_afk_status_disabled": "<prefix><gray>AFK-Status Broadcasts wurden deaktiviert.",
+  "command.afk_cooldown": "<prefix><red>Du kannst deinen AFK-Status erst in <time> wieder ändern.",
   "error.no_caller_type": "<prefix><red>Falscher CallerType.",
   "actionbar.afk": "<blue>Du bist AFK"
 }

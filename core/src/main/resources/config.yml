@@ -20,6 +20,10 @@ afk-broadcast: true
 # Requires afk-broadcast to be enabled
 afk-broadcast-only-current-server: true
 
+# Cooldown time between AFK toggle commands to prevent spamming
+# Time unit is in seconds
+afk-command-cooldown: 30
+
 # Delay after which the warning message is sent to the player (seconds) | Lang entry: "notification.afk_warning"
 # e.g., if set to 90, the player will receive a warning message after 1 minute and 30 seconds of inactivity
 warning-delay: 90
