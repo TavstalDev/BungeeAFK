@@ -30,7 +30,7 @@ public class VelocityAFKHandler extends AFKHandler {
             handleJoin(VelocityPlayer.adapt(event.getPlayer()));
         }
         else {
-            boolean disableAfkOnReturn = PluginConfig.get().getBoolean("afk-disable-when-returning");
+            boolean disableAfkOnReturn = PluginConfig.get().getBoolean("afk-update-state-when-returning");
             if (!disableAfkOnReturn)
                 return;
 

@@ -50,7 +50,7 @@ afk-server-name: "afk"
 # Used for proxy platforms (BungeeCord/Velocity) to disable AFK mode, when they
 # return from the AFK server
 # NOTE: At the moment, this only works for Velocity proxies
-afk-disable-when-returning: false
+afk-update-state-when-returning: false
 
 # AFK Location configuration
 # If the action is set to "teleport", the player will be teleported to this location

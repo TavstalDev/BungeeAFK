@@ -62,7 +62,7 @@ public class YamlUtil {
             # Used for proxy platforms (BungeeCord/Velocity) to disable AFK mode, when they
             # return from the AFK server
             # NOTE: At the moment, this only works for Velocity proxies
-            afk-disable-when-returning: %b
+            afk-update-state-when-returning: %b
 
             # AFK zone configuration
             # If the action is set to "teleport", the player will be teleported to this location
@@ -170,7 +170,7 @@ public class YamlUtil {
                 PluginConfig.get().getInt("action-delay", 630),
                 PluginConfig.get().getString("action", "kick"),
                 PluginConfig.get().getString("afk-server-name", ""),
-                PluginConfig.get().getBoolean("afk-disable-when-returning", false),
+                PluginConfig.get().getBoolean("afk-update-state-when-returning", false),
                 PluginConfig.get().getSection("afk-location").get("world"),
                 PluginConfig.get().getSection("afk-location").get("x"),
                 PluginConfig.get().getSection("afk-location").get("y"),
