@@ -343,8 +343,11 @@ public abstract class AFKHandler {
     }
 
     private void sendActionBar(@NotNull BAFKPlayer<?> player) {
-        if (player.getAfkState() == AFKState.AFK || player.getAfkState() == AFKState.ACTION_TAKEN) {
+        if (player.getAfkState() == AFKState.AFK) {
             player.sendActionbar(Caption.of("actionbar.afk"));
+        }
+        else if (player.getAfkState() == AFKState.ACTION_TAKEN) {
+            player.sendActionbar(Caption.of("actionbar.afk-action-taken"));
         }
     }
 

@@ -86,5 +86,6 @@
   "command.broadcast_afk_status_disabled": "<prefix><gray>AFK status broadcasts are now disabled.",
   "command.afk_cooldown": "<prefix><red>Please wait <time> seconds before toggling your AFK status again.",
   "error.no_caller_type": "<prefix><red>Invalid CallerType.",
-  "actionbar.afk": "<blue>You are AFK"
+  "actionbar.afk": "<blue>You are AFK",
+  "actionbar.afk-action-taken": "<red>You have been moved to the AFK server"
 }
